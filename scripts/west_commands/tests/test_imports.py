@@ -17,6 +17,7 @@ def test_runner_imports():
         # zephyr-keep-sorted-start
         'arc-nsim',
         'blackmagicprobe',
+        'blflash',
         'bossac',
         'canopen',
         'dediprog',
