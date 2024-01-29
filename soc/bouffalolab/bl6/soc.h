@@ -42,10 +42,6 @@
 #define SOC_BOUFFALOLAB_BL_HCLK_FREQ_HZ	\
 		DT_PROP(DT_PATH(cpus, cpu_0), clock_frequency)
 
-#ifdef CONFIG_RISCV_GP
-ulong_t __soc_get_gp_initial_value(void);
-#endif
-
 /* clang-format on */
 
 #endif /* !_ASMLANGUAGE */

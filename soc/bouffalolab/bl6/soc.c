@@ -48,14 +48,6 @@ static void peripheral_clock_init(void)
 	GLB_Set_UART_CLK(1, HBN_UART_CLK_160M, ROOT_UART_CLOCK_DIV);
 }
 
-#ifdef CONFIG_RISCV_GP
-ulong_t __soc_get_gp_initial_value(void)
-{
-	extern uint32_t __global_pointer$;
-	return (ulong_t)&__global_pointer$;
-}
-#endif
-
 void soc_early_init_hook(void)
 {
 	uint32_t key;
