@@ -38,8 +38,8 @@ LOG_MODULE_REGISTER(video_emul_imager, CONFIG_VIDEO_LOG_LEVEL);
 uint8_t emul_imager_fake_regs[10];
 
 enum emul_imager_fmt_id {
-	RGB565_64x20,
 	YUYV_64x20,
+	RGB565_64x20,
 };
 
 struct emul_imager_reg {
@@ -101,9 +101,9 @@ static const struct emul_imager_reg emul_imager_rgb565_64x20_60fps[] = {
 	{0},
 };
 struct emul_imager_mode emul_imager_rgb565_64x20_modes[] = {
-	{.fps = 15, .regs = {emul_imager_rgb565_64x20, emul_imager_rgb565_64x20_15fps}},
-	{.fps = 30, .regs = {emul_imager_rgb565_64x20, emul_imager_rgb565_64x20_30fps}},
 	{.fps = 60, .regs = {emul_imager_rgb565_64x20, emul_imager_rgb565_64x20_60fps}},
+	{.fps = 30, .regs = {emul_imager_rgb565_64x20, emul_imager_rgb565_64x20_30fps}},
+	{.fps = 15, .regs = {emul_imager_rgb565_64x20, emul_imager_rgb565_64x20_15fps}},
 	{0},
 };
 
@@ -121,8 +121,8 @@ static const struct emul_imager_reg emul_imager_yuyv_64x20_30fps[] = {
 	{0},
 };
 struct emul_imager_mode emul_imager_yuyv_64x20_modes[] = {
-	{.fps = 15, .regs = {emul_imager_yuyv_64x20, emul_imager_yuyv_64x20_15fps}},
 	{.fps = 30, .regs = {emul_imager_yuyv_64x20, emul_imager_yuyv_64x20_30fps}},
+	{.fps = 15, .regs = {emul_imager_yuyv_64x20, emul_imager_yuyv_64x20_15fps}},
 	{0},
 };
 
@@ -130,8 +130,8 @@ struct emul_imager_mode emul_imager_yuyv_64x20_modes[] = {
  * index, matching fmts[].
  */
 static const struct emul_imager_mode *emul_imager_modes[] = {
-	[RGB565_64x20] = emul_imager_rgb565_64x20_modes,
 	[YUYV_64x20] = emul_imager_yuyv_64x20_modes,
+	[RGB565_64x20] = emul_imager_rgb565_64x20_modes,
 };
 
 /* Video device capabilities where the supported resolutions and pixel formats are listed.
@@ -148,8 +148,8 @@ static const struct emul_imager_mode *emul_imager_modes[] = {
 		.height_step = 0,                                                                  \
 	}
 static const struct video_format_cap fmts[] = {
-	[RGB565_64x20] = EMUL_IMAGER_VIDEO_FORMAT_CAP(64, 20, VIDEO_PIX_FMT_RGB565),
 	[YUYV_64x20] = EMUL_IMAGER_VIDEO_FORMAT_CAP(64, 20, VIDEO_PIX_FMT_YUYV),
+	[RGB565_64x20] = EMUL_IMAGER_VIDEO_FORMAT_CAP(64, 20, VIDEO_PIX_FMT_RGB565),
 	{0},
 };
 
