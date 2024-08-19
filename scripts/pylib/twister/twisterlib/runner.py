@@ -1467,34 +1467,56 @@ class TwisterRunner:
                     else:
                         pipeline.put({"op": "cmake", "test": instance})
 
+    @staticmethod
+    def clear_pipeline(pipeline):
+        while not pipeline.empty():
+            try:
+                pipeline.get_nowait()
+            except queue.Empty:
+                break
 
     def pipeline_mgr(self, pipeline, done_queue, lock, results):
         try:
+            quit_on_failure = False
             if sys.platform == 'linux':
                 with self.jobserver.get_job():
                     while True:
                         try:
                             task = pipeline.get_nowait()
                         except queue.Empty:
+                            if self.env.options.quit_on_failure and quit_on_failure:
+                                return True
                             break
                         else:
                             instance = task['test']
                             pb = ProjectBuilder(instance, self.env, self.jobserver)
                             pb.duts = self.duts
                             pb.process(pipeline, done_queue, task, lock, results)
-
+                            if pb and self.env.options.quit_on_failure and not quit_on_failure:
+                                if pb.instance.status in [TwisterStatus.FAIL, TwisterStatus.ERROR]:
+                                    self.clear_pipeline(pipeline)
+                                    next_op = 'report'
+                                    pb._add_to_pipeline(pipeline, next_op)
+                                    quit_on_failure = True
                     return True
             else:
                 while True:
                     try:
                         task = pipeline.get_nowait()
                     except queue.Empty:
+                        if self.env.options.quit_on_failure and quit_on_failure:
+                            return True
                         break
                     else:
                         instance = task['test']
                         pb = ProjectBuilder(instance, self.env, self.jobserver)
                         pb.duts = self.duts
                         pb.process(pipeline, done_queue, task, lock, results)
+                        if pb and self.env.options.quit_on_failure and not quit_on_failure:
+                            if pb.instance.status in [TwisterStatus.FAIL, TwisterStatus.ERROR]:
+                                next_op = 'report'
+                                pb._add_to_pipeline(pipeline, next_op)
+                                quit_on_failure = True
                 return True
         except Exception as e:
             logger.error(f"General exception: {e}")
