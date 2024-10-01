@@ -1125,3 +1125,12 @@ test_i2c_ilps22qs: ilps22qs@9c {
 	avg = <LPS2xDF_DT_AVG_128_SAMPLES>;
 	fs = <ILPS22QS_DT_FS_MODE_1_1260>;
 };
+
+test_i2c_npm2100: npm2100@9d {
+	compatible = "nordic,npm2100";
+	reg = <0x93>;
+
+	vbat {
+		compatible = "nordic,npm2100-vbat";
+	};
+};
