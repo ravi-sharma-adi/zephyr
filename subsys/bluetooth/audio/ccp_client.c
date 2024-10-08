@@ -228,3 +228,21 @@ int bt_ccp_client_unregister_cb(struct bt_ccp_client_cb *cb)
 
 	return 0;
 }
+
+int bt_ccp_client_get_bearers(struct bt_ccp_client *client, struct bt_ccp_client_bearers *bearers)
+{
+	CHECKIF(client == NULL) {
+		LOG_DBG("client is NULL");
+		return -EINVAL;
+	}
+
+	CHECKIF(bearers == NULL) {
+		LOG_DBG("bearers is NULL");
+		return -EINVAL;
+	}
+
+	memset(bearers, 0, sizeof(*bearers));
+	populate_bearers(client, bearers);
+
+	return 0;
+}
