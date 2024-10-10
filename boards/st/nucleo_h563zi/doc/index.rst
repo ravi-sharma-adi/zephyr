@@ -1,4 +1,7 @@
-.. zephyr:board:: nucleo_h563zi
+.. _nucleo_h563zi_board:
+
+ST Nucleo H563ZI
+################
 
 Overview
 ********
@@ -37,6 +40,10 @@ Here are some highlights of the Nucleo H563ZI board:
 - 32.789 kHz crystal oscillator
 
 More information about the board can be found at the `NUCLEO_H563ZI website`_.
+
+.. image:: img/nucleo_h563zi.jpg
+   :align: center
+   :alt: NUCLEO H563ZI
 
 Hardware
 ********
@@ -167,6 +174,8 @@ The Zephyr nucleo_h563zi board configuration supports the following hardware fea
 +-----------+------------+-------------------------------------+
 | I2C       | on-chip    | i2c bus                             |
 +-----------+------------+-------------------------------------+
+| I3C       | on-chip    | i3c bus                             |
++-----------+------------+-------------------------------------+
 | UART      | on-chip    | serial port-polling;                |
 |           |            | serial port-interrupt               |
 +-----------+------------+-------------------------------------+
@@ -174,8 +183,7 @@ The Zephyr nucleo_h563zi board configuration supports the following hardware fea
 +-----------+------------+-------------------------------------+
 | USB       | on-chip    | USB full-speed host/device bus      |
 +-----------+------------+-------------------------------------+
-| ETHERNET  | on-chip    | ethernet                            |
-+-----------+------------+-------------------------------------+
+
 
 Other hardware features are not yet supported on this Zephyr port.
 
@@ -222,6 +230,7 @@ Default Zephyr Peripheral Mapping:
 - SPI1 SCK/MISO/MOSI/CS: PA5/PG9/PB5/PD14
 - UART3 TX/RX : PD8/PD9 (VCP)
 - USER_PB : PC13
+- I3C1: PD12(SCL) & PD13(SDA)
 
 System Clock
 ------------
