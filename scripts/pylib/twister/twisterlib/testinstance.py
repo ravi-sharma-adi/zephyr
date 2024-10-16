@@ -242,13 +242,14 @@ class TestInstance:
 
     # Global testsuite parameters
     def check_runnable(self,
-                    options,
-                    hardware_map=None):
+                       options: TwisterEnv,
+                       hardware_map=None):
 
         enable_slow = options.enable_slow
         filter = options.filter
         fixtures = options.fixture
         device_testing = options.device_testing
+        simulation = options.sim_name
 
         if os.name == 'nt':
             # running on simulators is currently supported only for QEMU on Windows

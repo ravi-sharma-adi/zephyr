@@ -95,7 +95,7 @@ class TestPlan:
     SAMPLE_FILENAME = 'sample.yaml'
     TESTSUITE_FILENAME = 'testcase.yaml'
 
-    def __init__(self, env=None):
+    def __init__(self, env: Namespace):
 
         self.options = env.options
         self.env = env

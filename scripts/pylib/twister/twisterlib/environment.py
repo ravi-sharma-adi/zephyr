@@ -18,7 +18,7 @@ import sys
 from datetime import datetime, timezone
 from importlib import metadata
 from pathlib import Path
-from typing import Generator, List
+from typing import Generator, List, Optional
 
 from twisterlib.coverage import supported_coverage_formats
 
@@ -60,7 +60,7 @@ def norm_path(astring):
     return newstring
 
 
-def add_parse_arguments(parser = None):
+def add_parse_arguments(parser = None) -> argparse.ArgumentParser:
     if parser is None:
         parser = argparse.ArgumentParser(
             description=__doc__,
@@ -794,7 +794,7 @@ structure in the main Zephyr tree: boards/<vendor>/<board_name>/""")
     return parser
 
 
-def parse_arguments(parser, args, options = None, on_init=True):
+def parse_arguments(parser: argparse.ArgumentParser, args, options = None, on_init=True) -> argparse.Namespace:
     if options is None:
         options = parser.parse_args(args)
 
@@ -941,7 +941,7 @@ def strip_ansi_sequences(s: str) -> str:
 
 class TwisterEnv:
 
-    def __init__(self, options, default_options=None) -> None:
+    def __init__(self, options : argparse.Namespace, default_options=None) -> None:
         self.version = "Unknown"
         self.toolchain = None
         self.commit_date = "Unknown"
