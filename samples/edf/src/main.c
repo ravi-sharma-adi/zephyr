@@ -43,7 +43,9 @@ edf_t task3 = {
 };
 
 
-void trigger(edf_t *task){
+void trigger(struct k_timer *timer){
+	edf_t *task = (edf_t *) k_timer_user_data_get(timer);
+	const char t = 1;
 	/*
 		the message itself is not relevant -
 		the *act* of sending the message is.
@@ -55,16 +57,9 @@ void trigger(edf_t *task){
 		will not trigger a preemption even if
 		it happens to be the earliest deadline.
 	*/
-	const char t = 1;
 	int deadline = MSEC_TO_CYC(task->rel_deadline_msec);
 	k_thread_deadline_set(task->thread, deadline);
 	k_msgq_put(&task->queue, &t, K_NO_WAIT);
-}
-
-
-void trigger_one(struct k_timer *timer){
-	edf_t *task = (edf_t *) k_timer_user_data_get(timer);
-	trigger(task);
 }
 
 
@@ -79,9 +74,8 @@ void thread_function(void *task_props, void *a2, void *a3){
 	edf_t *task = (edf_t *) task_props;
 	task->thread = k_current_get();
 
-	k_thread_custom_data_set((void *) task);
 	k_msgq_init(&task->queue, buffer, sizeof(char), 10);
-	k_timer_init(&task->timer, trigger_one, NULL);
+	k_timer_init(&task->timer, trigger, NULL);
 	k_timer_user_data_set(&task->timer, (void *) task);
 	k_timer_start(&task->timer, K_MSEC(task->initial_delay_msec), K_MSEC(task->period_msec));
 	printf("[ %d ] %d   \tready.\n", task->id, counter);

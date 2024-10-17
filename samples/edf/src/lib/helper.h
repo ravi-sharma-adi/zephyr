@@ -13,8 +13,6 @@
 #define INACTIVE                -1
 #define MSEC_TO_CYC(msec)       k_ms_to_cyc_near32(msec)
 #define MSEC_TO_USEC(msec)      (msec * USEC_PER_MSEC)
-#define CYC_TO_TICKS(cyc)       k_cyc_to_ticks_ceil64(cyc)
-// #define TICKS_TO_MSEC(ticks)    ((ticks * CONFIG_SYS_CLOCK_TICKS_PER_SEC) / MSEC_PER_SEC)
 
 typedef struct {
     int id;
