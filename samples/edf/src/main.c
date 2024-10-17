@@ -5,7 +5,6 @@
 */
 
 #include <zephyr/kernel.h>
-#include <string.h>
 #include "lib/helper.h"
 
 /*
