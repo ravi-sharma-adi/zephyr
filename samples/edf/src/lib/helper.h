@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2024 Instituto Superior de Engenharia do Porto (ISEP).
+ *
+ * SPDX-License-Identifier: Apache-2.0
+*/
+
 #ifndef _APP_HELPER_H_
 #define _APP_HELPER_H_
 
