@@ -1,7 +1,7 @@
-.. _edf_sample:
+.. zephyr:code-sample:: edf
+   :name: Earliest Deadline First (EDF)
 
-Earliest Deadline First (EDF) sample
-####################################
+   Runs three threads under the EDF scheduler.
 
 Overview
 ********
@@ -12,12 +12,12 @@ threads do nothing special - they just increment a counter,
 busy wait for the configured WCET (worst-case execution time),
 and sleep waiting for the next period to come.
 
-However, the threads themselves are not periodic. What makes
-them run periodically is a timer assigned to each thread that
-regularly activates them by sending a message to the respective
-thread message queue. The **message** is not important; the act
-of sending the message is. When the thread receives a message,
-it unblocks and executes for a cycle, remaining dormant afterwards
+Each thread has a timer and a message queue associated with it.
+What makes them run periodically is the timer, which regularly
+sends a message to the respective thread message queue. Keep in
+mind that the *message* is not important; instead, the *act* of
+sending the message is. When the thread receives a message, it
+unblocks and executes for a cycle, remaining dormant afterwards
 until a new message comes by.
 
 
