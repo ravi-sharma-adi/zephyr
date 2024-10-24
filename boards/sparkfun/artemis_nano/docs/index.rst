@@ -27,7 +27,7 @@ For more information about the SparkFun RedBoard Artemis Nano:
 Supported Features
 ==================
 
-The Sparkfun Redboard Artemis Nano board configuration supports the following hardware features:
+The Sparkfun Redboard Artemis Nano board target supports the following hardware features:
 
 +-----------+------------+-------------------------------------+
 | Interface | Controller | Driver/Component                    |
@@ -68,7 +68,7 @@ Build the Zephyr kernel and application, then flash it to the device:
    :goals: flash
 
 .. note::
-   The `west flash` command requires the `SparkFun SVL bootloader`_ and a custom flash program that has been implemented for this board. To use west flash you have to add Artemis-Firmware-Upload-GUI-3.0.0/artemis_uploader to your PATH.
+   The `west flash -b artemis_nano` command requires the `SparkFun SVL bootloader`_ and a custom flash program that has been implemented for this board. To use west flash you have to add Artemis-Firmware-Upload-GUI-3.0.0/artemis_uploader to your PATH.
 
 After flashing the board you should see the blue LED (USER LED D19) is blinking.
 
