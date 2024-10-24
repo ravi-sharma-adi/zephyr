@@ -243,6 +243,12 @@ Libraries / Subsystems
 
 * Crypto
 
+  * The Kconfig symbol :kconfig:option:`CONFIG_MBEDTLS_PSA_STATIC_KEY_SLOTS` was
+    added to allow Mbed TLS to use pre-allocated static buffers to store key material
+    in its PSA Crypto core instead of heap-allocated ones. This can help reducing
+    (or removing, if no other component makes use of it) heap memory requirements
+    from the final application.
+
 * CMSIS-NN
 
 * FPGA
