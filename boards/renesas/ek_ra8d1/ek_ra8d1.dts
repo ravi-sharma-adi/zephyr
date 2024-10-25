@@ -152,3 +152,12 @@
 		status = "okay";
 	};
 };
+
+&sdhc1 {
+	compatible = "renesas,ra-sdhc";
+	interrupt-names = "accs", "card", "dma-req";
+	interrupts = <60 12>, <61 12>, <62 12>;
+	pinctrl-0 = <&sdhc1_default>;
+	pinctrl-names = "default";
+	status = "okay";
+};
