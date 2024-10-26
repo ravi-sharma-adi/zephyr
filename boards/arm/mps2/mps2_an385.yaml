@@ -6,7 +6,6 @@ simulation: qemu
 toolchain:
   - zephyr
   - gnuarmemb
-  - xtools
 supported:
   - counter
   - netif:serial-net

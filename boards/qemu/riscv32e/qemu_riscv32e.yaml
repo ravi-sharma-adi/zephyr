@@ -5,7 +5,6 @@ simulation: qemu
 arch: riscv
 toolchain:
   - zephyr
-  - xtools
 supported:
   - netif
 testing:

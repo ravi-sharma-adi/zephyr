@@ -15,7 +15,6 @@ simulation: qemu
 toolchain:
   - gnuarmemb
   - zephyr
-  - xtools
 testing:
   default: true
   only_tags:
