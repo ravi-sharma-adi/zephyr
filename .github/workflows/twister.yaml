@@ -87,6 +87,11 @@ jobs:
 
           echo "ZEPHYR_SDK_INSTALL_DIR=/opt/toolchains/zephyr-sdk-$( cat SDK_VERSION )" >> $GITHUB_ENV
 
+      - name: install-packages
+        if: github.event_name == 'pull_request_target'
+        run: |
+          pip3 install -r scripts/requirements-base.txt -r scripts/requirements-build-test.txt -r scripts/requirements-run-test.txt
+
       - name: Generate Test Plan with Twister
         if: github.event_name == 'pull_request_target'
         id: test-plan

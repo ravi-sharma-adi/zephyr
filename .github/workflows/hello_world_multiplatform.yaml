@@ -60,6 +60,12 @@ jobs:
           app-path: zephyr
           toolchains: all
 
+      - name: install packages
+        working-directory: zephyr
+        shell: bash
+        run: |
+          pip3 install -r scripts/requirements-base.txt -r scripts/requirements-build-test.txt -r scripts/requirements-run-test.txt
+
       - name: Build firmware
         working-directory: zephyr
         shell: bash
