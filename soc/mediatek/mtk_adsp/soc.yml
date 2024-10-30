@@ -8,3 +8,6 @@ family:
         socs:
           - name: mt8186_adsp
           - name: mt8188_adsp
+      - name: mt8196_adsp
+        socs:
+          - name: mt8196_adsp

@@ -16,6 +16,12 @@ config SOC_SERIES_MT818X_ADSP
 	help
 	  Mediatek MT818x Audio DSPs
 
+config SOC_SERIES_MT8196_ADSP
+	bool
+	select SOC_FAMILY_MTK_ADSP
+	help
+	  Mediatek MT8196 Audio DSPs
+
 config SOC_MT8195_ADSP
 	bool
 	select SOC_SERIES_MT8195_ADSP
@@ -28,7 +34,12 @@ config SOC_MT8188_ADSP
 	bool
 	select SOC_SERIES_MT818X_ADSP
 
+config SOC_MT8196_ADSP
+	bool
+	select SOC_SERIES_MT8196_ADSP
+
 config SOC
 	default "mt8195_adsp" if SOC_MT8195_ADSP
 	default "mt8186_adsp" if SOC_MT8186_ADSP
 	default "mt8188_adsp" if SOC_MT8188_ADSP
+	default "mt8196_adsp" if SOC_MT8196_ADSP
