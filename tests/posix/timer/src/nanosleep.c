@@ -231,27 +231,27 @@ ZTEST(nanosleep, test_clock_nanosleep_execution)
 
 	/* until 1s + 1ns past the reference time */
 	common_lower_bound_check(SELECT_CLOCK_NANOSLEEP, CLOCK_MONOTONIC, TIMER_ABSTIME,
-		ts.tv_sec + 1, 1);
+				 ts.tv_sec + 1, 1);
 
 	/* until 1s + 1us past the reference time */
 	common_lower_bound_check(SELECT_CLOCK_NANOSLEEP, CLOCK_MONOTONIC, TIMER_ABSTIME,
-		ts.tv_sec + 1, 1000);
+				 ts.tv_sec + 1, 1000);
 
 	/* until 1s + 500000000ns past the reference time */
 	common_lower_bound_check(SELECT_CLOCK_NANOSLEEP, CLOCK_MONOTONIC, TIMER_ABSTIME,
-		ts.tv_sec + 1, 500000000);
+				 ts.tv_sec + 1, 500000000);
 
 	/* until 2s past the reference time */
 	common_lower_bound_check(SELECT_CLOCK_NANOSLEEP, CLOCK_MONOTONIC, TIMER_ABSTIME,
-		ts.tv_sec + 2, 0);
+				 ts.tv_sec + 2, 0);
 
 	/* until 2s + 1ns past the reference time */
 	common_lower_bound_check(SELECT_CLOCK_NANOSLEEP, CLOCK_MONOTONIC, TIMER_ABSTIME,
-		ts.tv_sec + 2, 1);
+				 ts.tv_sec + 2, 1);
 
 	/* until 2s + 1us + 1ns past reference time */
 	common_lower_bound_check(SELECT_CLOCK_NANOSLEEP, CLOCK_MONOTONIC, TIMER_ABSTIME,
-		ts.tv_sec + 2, 1001);
+				 ts.tv_sec + 2, 1001);
 
 	clock_gettime(CLOCK_REALTIME, &ts);
 
