@@ -487,12 +487,12 @@ static int eeprom_at25_read(const struct device *dev, off_t offset, void *buf,
 static int eeprom_at25_wren(const struct device *dev)
 {
 	const struct eeprom_at2x_config *config = dev->config;
-	uint8_t cmd = EEPROM_AT25_WREN;
-	const struct spi_buf tx_buf = {
-		.buf = &cmd,
+	static const uint8_t cmd = EEPROM_AT25_WREN;
+	static const struct spi_buf tx_buf = {
+		.buf = (void *)&cmd,
 		.len = 1,
 	};
-	const struct spi_buf_set tx = {
+	static const struct spi_buf_set tx = {
 		.buffers = &tx_buf,
 		.count = 1,
 	};
