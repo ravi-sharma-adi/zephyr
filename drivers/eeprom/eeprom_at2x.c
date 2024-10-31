@@ -359,14 +359,14 @@ static bool eeprom_at25_bus_is_ready(const struct device *dev)
 static int eeprom_at25_rdsr(const struct device *dev, uint8_t *status)
 {
 	const struct eeprom_at2x_config *config = dev->config;
-	uint8_t rdsr[2] = { EEPROM_AT25_RDSR, 0 };
+	static const uint8_t rdsr[2] = { EEPROM_AT25_RDSR, 0 };
 	uint8_t sr[2];
 	int err;
-	const struct spi_buf tx_buf = {
-		.buf = rdsr,
+	static const struct spi_buf tx_buf = {
+		.buf = (void *)rdsr,
 		.len = sizeof(rdsr),
 	};
-	const struct spi_buf_set tx = {
+	static const struct spi_buf_set tx = {
 		.buffers = &tx_buf,
 		.count = 1,
 	};
