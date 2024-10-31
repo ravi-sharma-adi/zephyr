@@ -9,7 +9,6 @@
 #include <stdlib.h>
 
 #include <zephyr/bluetooth/audio/cap.h>
-#include <zephyr/bluetooth/audio/vcp.h>
 #include <zephyr/fff.h>
 
 #include "bluetooth.h"
@@ -18,6 +17,7 @@
 #include "expects_util.h"
 #include "cap_mocks.h"
 #include "test_common.h"
+#include "test_broadcast_reception.h"
 
 #include <zephyr/logging/log.h>
 
@@ -47,7 +47,6 @@ struct cap_commander_test_broadcast_reception_fixture {
 /* src_id can not be part of the fixture since it is accessed in the callback function */
 static uint8_t src_id[CONFIG_BT_MAX_CONN];
 
-static void test_start_param_init(void *f);
 static void test_stop_param_init(void *f);
 
 static void cap_commander_broadcast_assistant_recv_state_cb(
@@ -104,13 +103,12 @@ static void cap_commander_test_broadcast_reception_before(void *f)
 static void cap_commander_test_broadcast_reception_after(void *f)
 {
 	struct cap_commander_test_broadcast_reception_fixture *fixture = f;
-	int err;
 
 	bt_cap_commander_unregister_cb(&mock_cap_commander_cb);
 	bt_bap_broadcast_assistant_unregister_cb(&fixture->broadcast_assistant_cb);
 
 	/* We need to cleanup since the CAP commander remembers state */
-	err = bt_cap_commander_cancel();
+	bt_cap_commander_cancel();
 
 	for (size_t i = 0; i < ARRAY_SIZE(fixture->conns); i++) {
 		mock_bt_conn_disconnected(&fixture->conns[i], BT_HCI_ERR_REMOTE_USER_TERM_CONN);
@@ -122,7 +120,10 @@ static void cap_commander_test_broadcast_reception_teardown(void *f)
 	free(f);
 }
 
-static void test_start_param_init(void *f)
+/* Note that test_start_param_init is re-used for the
+ * distribute_broadcast_code test
+ */
+void test_start_param_init(void *f)
 {
 	struct cap_commander_test_broadcast_reception_fixture *fixture = f;
 	int err;
@@ -169,8 +170,11 @@ static void test_stop_param_init(void *f)
 	}
 }
 
-static void
-test_broadcast_reception_start(struct bt_cap_commander_broadcast_reception_start_param *start_param)
+/* Note that the broadcast_reception_start test is re-used for the
+ * distribute_broadcast_code test
+ */
+void test_broadcast_reception_start(
+	struct bt_cap_commander_broadcast_reception_start_param *start_param)
 {
 	int err;
 
