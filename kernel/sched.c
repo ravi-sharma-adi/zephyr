@@ -1082,8 +1082,11 @@ void z_impl_k_thread_deadline_set(k_tid_t tid, int deadline)
 	}
 }
 
-int32_t k_thread_deadline_get(k_tid_t thread){
-	if(!thread) return 0;
+int32_t k_thread_deadline_get(k_tid_t thread)
+{
+	if (!thread) {
+		return 0;
+	}
 	return (int32_t) thread->base.prio_deadline;
 }
 

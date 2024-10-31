@@ -966,10 +966,10 @@ __syscall void k_thread_deadline_set(k_tid_t thread, int deadline);
  * scheduler when deciding which thread has the highest priority.
  * The value returned is the absolute point in time calculated from
  * the relative deadline value passed in k_thread_deadline_set().
- * 
+ *
  * @note You should enable @kconfig{CONFIG_SCHED_DEADLINE} in your project
  * configuration.
- * 
+ *
  * @param thread Thread from which to get the deadline
  * @return absolute deadline value, in cycle units
  *

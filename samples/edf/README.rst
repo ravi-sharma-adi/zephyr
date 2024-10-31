@@ -52,10 +52,11 @@ are initially triggered at roughly the same time in order 1-3-2 (as
 you can see on the start timestamps), but thread 3 takes the lead
 and finishes in first thanks to its earliest deadline. Thread 2
 follows and thread 1 finishes in last, even though it was triggered
-before the others. 
+before the others.
 
 .. code-block:: console
 
   [ 3 ] 1         start 10135661   end 10146064    dead 10235018
   [ 2 ] 1         start 10171833   end 10271886    dead 10334639
   [ 1 ] 1         start 10112835   end 10300478    dead 10408821
+  

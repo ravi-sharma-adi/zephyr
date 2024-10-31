@@ -8,8 +8,8 @@
 };
 
 / {
-    chosen {
+	chosen {
 		zephyr,console = &usb_cdc;
-   		zephyr,shell-uart = &usb_cdc;
+		zephyr,shell-uart = &usb_cdc;
 	};
 };
