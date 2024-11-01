@@ -533,7 +533,7 @@ struct wifi_connect_req_params {
 	/** suiteb or suiteb-192 */
 	uint8_t suiteb_type;
 	/** eap version */
-	uint8_t eap_ver;
+	int eap_ver;
 	/** Identity for EAP */
 	const uint8_t *eap_identity;
 	/** eap identity length, max 64 */
@@ -544,6 +544,14 @@ struct wifi_connect_req_params {
 	uint8_t eap_passwd_length;
 	/** Fast BSS Transition used */
 	bool ft_used;
+	/** Number of EAP users */
+	uint8_t nusers;
+	/** Number of EAP passwds */
+	uint8_t passwds;
+	/** User Identities */
+	const uint8_t *identities[WIFI_ENT_IDENTITY_MAX_USERS];
+	/** User Passwords */
+	const uint8_t *passwords[WIFI_ENT_IDENTITY_MAX_USERS];
 };
 
 /** @brief Wi-Fi connect result codes. To be overlaid on top of \ref wifi_status
@@ -795,6 +803,18 @@ struct wifi_enterprise_creds_params {
 	uint8_t *client_key2;
 	/** Phase2 Client key length */
 	uint32_t client_key2_len;
+	/** Server certification */
+	uint8_t *server_cert;
+	/** Server certification length */
+	uint32_t server_cert_len;
+	/** Server key */
+	uint8_t *server_key;
+	/** Server key length */
+	uint32_t server_key_len;
+	/** Diffie–Hellman parameter */
+	uint8_t *dh_param;
+	/** Diffie–Hellman parameter length */
+	uint32_t dh_param_len;
 };
 
 /** @brief Wi-Fi power save configuration */
