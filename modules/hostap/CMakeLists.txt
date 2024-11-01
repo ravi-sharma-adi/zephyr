@@ -224,8 +224,8 @@ zephyr_library_compile_definitions_ifdef(CONFIG_WIFI_NM_WPA_SUPPLICANT_AP
 	CONFIG_NO_ACCOUNTING
 	NEED_AP_MLME
 	CONFIG_IEEE80211AC
-	CONFIG_EAP_SERVER
-	CONFIG_EAP_SERVER_IDENTITY
+	EAP_SERVER
+	EAP_SERVER_IDENTITY
 )
 
 zephyr_library_compile_definitions_ifdef(CONFIG_WIFI_NM_WPA_SUPPLICANT_11AX
@@ -363,6 +363,14 @@ zephyr_library_compile_definitions_ifdef(CONFIG_WIFI_NM_WPA_SUPPLICANT_P2P
 zephyr_library_compile_definitions_ifdef(CONFIG_WIFI_NM_WPA_SUPPLICANT_WPS
 	CONFIG_WPS
 	EAP_WSC
+)
+
+zephyr_library_sources_ifdef(CONFIG_WIFI_NM_HOSTAPD_WPS
+	${HOSTAP_SRC_BASE}/eap_server/eap_server_wsc.c
+)
+
+zephyr_library_compile_definitions_ifdef(CONFIG_WIFI_NM_HOSTAPD_WPS
+	EAP_SERVER_WSC
 )
 
 zephyr_library_sources_ifdef(CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
