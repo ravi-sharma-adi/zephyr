@@ -826,7 +826,7 @@ static void adxl367_accel_convert(const struct device *dev,
 {
 	struct adxl367_data *data = dev->data;
 
-	int64_t micro_ms2 = value * (SENSOR_G * 250 / 10000 *
+	int64_t micro_ms2 = value * (SENSOR_G * 250 / 1000 *
 			  adxl367_scale_mul[data->range] / 1000);
 
 	val->val1 = micro_ms2 / 1000000;
