@@ -1201,6 +1201,7 @@ static int udc_stm32_driver_init0(const struct device *dev)
 		}
 	}
 
+	data->caps.hs = priv->pcd.Init.speed != PCD_SPEED_FULL;
 	data->caps.rwup = true;
 	data->caps.out_ack = false;
 	data->caps.mps0 = UDC_MPS0_64;
