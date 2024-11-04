@@ -13,6 +13,7 @@
 struct llext_elf_sect_map {
 	enum llext_mem mem_idx;
 	size_t offset;
+	bool has_relocs;
 };
 
 /*

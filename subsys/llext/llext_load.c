@@ -216,6 +216,15 @@ static int llext_map_sections(struct llext_loader *ldr, struct llext *ext,
 	int i, j;
 	const char *name;
 
+	/* early loop to mark sections where relocations will be applied */
+	for (i = 0; i < ldr->sect_cnt; ++i) {
+		elf_shdr_t *shdr = ldr->sect_hdrs + i;
+
+		if (shdr->sh_type == SHT_REL || shdr->sh_type == SHT_RELA) {
+			ldr->sect_map[shdr->sh_info].has_relocs = true;
+		}
+	}
+
 	for (i = 0; i < ldr->sect_cnt; ++i) {
 		elf_shdr_t *shdr = ldr->sect_hdrs + i;
 
@@ -301,6 +310,7 @@ static int llext_map_sections(struct llext_loader *ldr, struct llext *ext,
 			 * region descriptor.
 			 */
 			memcpy(region, shdr, sizeof(*region));
+			region->sh_info = 0; /* reuse for relocation status */
 		} else {
 			/* Make sure this section is compatible with the region */
 			if ((shdr->sh_flags & SHF_BASIC_TYPE_MASK) !=
@@ -360,6 +370,9 @@ static int llext_map_sections(struct llext_loader *ldr, struct llext *ext,
 			region->sh_offset = bot_ofs;
 			region->sh_size = top_ofs - bot_ofs;
 		}
+
+		/* Update this region's relocation status */
+		region->sh_info |= ldr->sect_map[i].has_relocs;
 	}
 
 	/*

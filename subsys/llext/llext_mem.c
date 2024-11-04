@@ -69,9 +69,13 @@ static int llext_copy_region(struct llext_loader *ldr, struct llext *ext,
 	}
 	ext->mem_size[mem_idx] = region->sh_size;
 
-	if (region->sh_type != SHT_NOBITS &&
-	    !IS_ENABLED(CONFIG_LLEXT_HW_MEMORY_CHECKS) &&
-	    ldr->storage == LLEXT_STORAGE_WRITABLE) {
+	if (region->sh_type != SHT_NOBITS &&               /* region has data in the ELF  */
+	    !IS_ENABLED(CONFIG_LLEXT_HW_MEMORY_CHECKS) &&  /* && no mem protection rules  */
+	    (ldr->storage == LLEXT_STORAGE_WRITABLE ||     /* && writable storage         */
+	     (ldr->storage == LLEXT_STORAGE_PERSISTENT &&  /*    || persistent storage    */
+	      !(region->sh_flags & SHF_WRITE) &&           /*       && read-only region   */
+	      !region->sh_info))                           /*       && no relocs to apply */
+	   ) {
 		/* Directly use data from the ELF buffer */
 		ext->mem[mem_idx] = llext_peek(ldr, region->sh_offset);
 		if (ext->mem[mem_idx]) {
