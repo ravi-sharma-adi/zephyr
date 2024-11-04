@@ -58,23 +58,24 @@ static void llext_init_mem_part(struct llext *ext, enum llext_mem mem_idx,
 	LOG_DBG("region %d: start 0x%zx, size %zd", mem_idx, (size_t)start, len);
 }
 
-static int llext_copy_section(struct llext_loader *ldr, struct llext *ext,
+static int llext_copy_region(struct llext_loader *ldr, struct llext *ext,
 			      enum llext_mem mem_idx)
 {
 	int ret;
+	elf_shdr_t *region = ldr->sects + mem_idx;
 
-	if (!ldr->sects[mem_idx].sh_size) {
+	if (!region->sh_size) {
 		return 0;
 	}
-	ext->mem_size[mem_idx] = ldr->sects[mem_idx].sh_size;
+	ext->mem_size[mem_idx] = region->sh_size;
 
-	if (ldr->sects[mem_idx].sh_type != SHT_NOBITS &&
+	if (region->sh_type != SHT_NOBITS &&
 	    IS_ENABLED(CONFIG_LLEXT_STORAGE_WRITABLE)) {
 		/* Directly use data from the ELF buffer if peek() is supported */
-		ext->mem[mem_idx] = llext_peek(ldr, ldr->sects[mem_idx].sh_offset);
+		ext->mem[mem_idx] = llext_peek(ldr, region->sh_offset);
 		if (ext->mem[mem_idx]) {
 			llext_init_mem_part(ext, mem_idx, (uintptr_t)ext->mem[mem_idx],
-				ldr->sects[mem_idx].sh_size);
+				region->sh_size);
 			ext->mem_on_heap[mem_idx] = false;
 			return 0;
 		}
@@ -85,36 +86,36 @@ static int llext_copy_section(struct llext_loader *ldr, struct llext *ext,
 	 * we are after that we can assign memory permission bits on.
 	 */
 #ifndef CONFIG_ARM_MPU
-	const uintptr_t sect_alloc = ROUND_UP(ldr->sects[mem_idx].sh_size, LLEXT_PAGE_SIZE);
-	const uintptr_t sect_align = LLEXT_PAGE_SIZE;
+	const uintptr_t region_alloc = ROUND_UP(region->sh_size, LLEXT_PAGE_SIZE);
+	const uintptr_t region_align = LLEXT_PAGE_SIZE;
 #else
-	uintptr_t sect_alloc = LLEXT_PAGE_SIZE;
+	uintptr_t region_alloc = LLEXT_PAGE_SIZE;
 
-	while (sect_alloc < ldr->sects[mem_idx].sh_size) {
-		sect_alloc *= 2;
+	while (region_alloc < region->sh_size) {
+		region_alloc *= 2;
 	}
-	uintptr_t sect_align = sect_alloc;
+	uintptr_t region_align = region_alloc;
 #endif
 
-	ext->mem[mem_idx] = llext_aligned_alloc(sect_align, sect_alloc);
+	ext->mem[mem_idx] = llext_aligned_alloc(region_align, region_alloc);
 	if (!ext->mem[mem_idx]) {
 		return -ENOMEM;
 	}
 
-	ext->alloc_size += sect_alloc;
+	ext->alloc_size += region_alloc;
 
 	llext_init_mem_part(ext, mem_idx, (uintptr_t)ext->mem[mem_idx],
-		sect_alloc);
+		region_alloc);
 
-	if (ldr->sects[mem_idx].sh_type == SHT_NOBITS) {
-		memset(ext->mem[mem_idx], 0, ldr->sects[mem_idx].sh_size);
+	if (region->sh_type == SHT_NOBITS) {
+		memset(ext->mem[mem_idx], 0, region->sh_size);
 	} else {
-		ret = llext_seek(ldr, ldr->sects[mem_idx].sh_offset);
+		ret = llext_seek(ldr, region->sh_offset);
 		if (ret != 0) {
 			goto err;
 		}
 
-		ret = llext_read(ldr, ext->mem[mem_idx], ldr->sects[mem_idx].sh_size);
+		ret = llext_read(ldr, ext->mem[mem_idx], region->sh_size);
 		if (ret != 0) {
 			goto err;
 		}
@@ -132,10 +133,10 @@ err:
 
 int llext_copy_strings(struct llext_loader *ldr, struct llext *ext)
 {
-	int ret = llext_copy_section(ldr, ext, LLEXT_MEM_SHSTRTAB);
+	int ret = llext_copy_region(ldr, ext, LLEXT_MEM_SHSTRTAB);
 
 	if (!ret) {
-		ret = llext_copy_section(ldr, ext, LLEXT_MEM_STRTAB);
+		ret = llext_copy_region(ldr, ext, LLEXT_MEM_STRTAB);
 	}
 
 	return ret;
@@ -149,7 +150,7 @@ int llext_copy_regions(struct llext_loader *ldr, struct llext *ext)
 			continue;
 		}
 
-		int ret = llext_copy_section(ldr, ext, mem_idx);
+		int ret = llext_copy_region(ldr, ext, mem_idx);
 
 		if (ret < 0) {
 			return ret;
