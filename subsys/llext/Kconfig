@@ -10,6 +10,10 @@ menuconfig LLEXT
 
 if LLEXT
 
+config LLEXT_HW_MEMORY_CHECKS
+	bool
+	default y if MPU || MMU || RISCV_PMP
+
 choice LLEXT_BINARY_TYPE
 	prompt "Binary object type for llext"
 	default LLEXT_TYPE_ELF_OBJECT if ARM || ARM64
