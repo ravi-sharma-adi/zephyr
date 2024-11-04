@@ -1,4 +1,5 @@
 # Copyright (c) 2022 Meta
+# Copyright (c) 2024 SILA Embedded Solutions GmbH
 # SPDX-License-Identifier: Apache-2.0
 
 config ICE40_FPGA
@@ -8,3 +9,23 @@ config ICE40_FPGA
 	depends on SPI
 	help
 	  Enable support for the Lattice iCE40 fpga driver.
+
+if ICE40_FPGA
+
+config ICE40_FGPA_LOAD_MODE_SPI
+	bool "SPI load mode for the iCE40 fpga driver"
+	default y
+	help
+	  Enable support for the SPI load mode of the iCE40 fpga driver.
+	  This will be possible to use only on more high performance MCUs,
+	  as otherwise the timing constraints of the iCE40 cannot be met.
+
+config ICE40_FGPA_LOAD_MODE_GPIO
+	bool "GPIO bitbang load mode for the iCE40 fpga driver"
+	default n
+	help
+	  Enable support for the GPIO bitbang load mode of the iCE40 fpga
+	  driver. This will ensure that also no low performance MCUs the
+	  timing constraints for the iCE40 are met.
+
+endif # ICE40_FPGA
