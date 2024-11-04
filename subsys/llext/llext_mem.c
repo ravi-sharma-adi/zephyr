@@ -71,8 +71,8 @@ static int llext_copy_region(struct llext_loader *ldr, struct llext *ext,
 
 	if (region->sh_type != SHT_NOBITS &&
 	    !IS_ENABLED(CONFIG_LLEXT_HW_MEMORY_CHECKS) &&
-	    IS_ENABLED(CONFIG_LLEXT_STORAGE_WRITABLE)) {
-		/* Directly use data from the ELF buffer if peek() is supported */
+	    ldr->storage == LLEXT_STORAGE_WRITABLE) {
+		/* Directly use data from the ELF buffer */
 		ext->mem[mem_idx] = llext_peek(ldr, region->sh_offset);
 		if (ext->mem[mem_idx]) {
 			llext_init_mem_part(ext, mem_idx, (uintptr_t)ext->mem[mem_idx],
