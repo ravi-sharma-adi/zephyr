@@ -6,6 +6,7 @@
 /dts-v1/;
 
 #include <renesas/ra/ra8/r7fa8d1bhecbd.dtsi>
+#include <zephyr/dt-bindings/flash_controller/ospi.h>
 #include <dt-bindings/gpio/gpio.h>
 
 #include "ek_ra8d1-pinctrl.dtsi"
@@ -57,20 +58,34 @@
 };
 
 &pll {
+	status = "okay";
+	pllp {
+		status = "okay";
+	};
+
+	pllq {
+		status = "okay";
+	};
+
+	pllr {
+		status = "okay";
+	};
+};
+
+&pll2 {
+	status = "okay";
 	clocks = <&xtal>;
 	div = <2>;
-	mul = <96 0>;
-	divp = <2>;
-	freqp = <DT_FREQ_M(480)>;
-	divq = <2>;
-	freqq = <DT_FREQ_M(480)>;
-	divr = <2>;
-	freqr = <DT_FREQ_M(480)>;
-	status = "okay";
+	mul = <80 0>;
+	pll2p {
+		status = "okay";
+		freq = <DT_FREQ_M(400)>;
+		div = <2>;
+	};
 };
 
 &sciclk {
-	clocks = <&pll>;
+	clocks = <&pllp>;
 	div = <4>;
 	status = "okay";
 };
@@ -78,6 +93,12 @@
 &canfdclk {
 	clocks = <&pll>;
 	div = <5>;
+	status = "okay";
+};
+
+&octaspiclk {
+	clocks = <&pll2p>;
+	div = <2>;
 	status = "okay";
 };
 
@@ -146,6 +167,21 @@
 		pinctrl-0 = <&canfd0_default>;
 		pinctrl-names = "default";
 		rx-max-filters = <16>;
+		status = "okay";
+	};
+};
+
+&ospi0 {
+	pinctrl-0 = <&ospi0_default>;
+	pinctrl-names = "default";
+	status = "okay";
+	s28hl512t: s28hl512t@80000000 {
+		compatible = "renesas,ra-ospi-b-nor";
+		protocol-mode = <OSPI_OPI_MODE>;
+		ospi-max-frequency = <DT_FREQ_M(200)>;
+		reg = <0x80000000 DT_SIZE_M(64)>;
+		size = <DT_SIZE_M(64)>; /* 512 Mbits */
+		write-block-size = <1>;
 		status = "okay";
 	};
 };
