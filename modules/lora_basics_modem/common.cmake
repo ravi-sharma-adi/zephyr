@@ -57,9 +57,9 @@ zephyr_library_sources(
 )
 
 zephyr_include_directories(
-  ${LORA_BASICS_MODEM_LIB_DIR}
-  ${LORA_BASICS_MODEM_LIB_DIR}/smtc_modem_api
-  ${LORA_BASICS_MODEM_LIB_DIR}/smtc_modem_hal
+  ${LBM_LIB_DIR}
+  ${LBM_LIB_DIR}/smtc_modem_api
+  ${LBM_LIB_DIR}/smtc_modem_hal
   ${LBM_SMTC_MODEM_CORE_DIR}
   ${LBM_SMTC_MODEM_CORE_DIR}/lorawan_api
   ${LBM_SMTC_MODEM_CORE_DIR}/lorawan_manager
