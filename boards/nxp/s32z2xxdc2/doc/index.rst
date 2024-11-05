@@ -170,6 +170,19 @@ EDMA
 The EDMA modules feature four EDMA3 instances: Instance 0 with 32 channels,
 and instances 1, 4, and 5, each with 16 channels.
 
+CRYPTO
+======
+
+The Hardware Security Engine (HSE) supports cryptographic operations, including hashing and
+symmetric ciphers, with capabilities for ECB, CBC, and CTR modes using RAM-based key catalogs
+with 128-bit or 256-bit key lengths.
+
+.. note::
+   The driver assumes that the HSE Firmware has been installed and configured (i.e the key catalogs
+   has been formatted, used MU instances has been activated, etc). HSE Firmware installation and
+   configuration phase documented in HSE Firmware User Manual. Please contact NXP sales person or
+   NXP distributor in order to have access to that document.
+
 Programming and Debugging
 *************************
 
