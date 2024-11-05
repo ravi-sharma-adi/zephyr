@@ -108,6 +108,11 @@ The below features are currently supported on Zephyr OS for EK-RA8D1 board:
 +--------------+------------+------------------+
 | COUNTER      | on-chip    | counter          |
 +--------------+------------+------------------+
+| Display      | on-chip    | LCDIF; MIPI-DSI. |
+|              |            |  Tested with     |
+|              |            | :ref:            |
+|              |            |rtkmipilcdb00000be|
++--------------+------------+------------------+
 
 Other hardware features are currently not supported by the port.
 
