@@ -242,7 +242,7 @@ static int lr11xx_pm_action(const struct device *dev, enum pm_device_action acti
 				 (COND_CODE_1(DT_NODE_HAS_COMPAT(node_id, semtech_lr1121),         \
 					      (LR11XX_SYSTEM_VERSION_TYPE_LR1121), (/**/))))))
 
-/* LR11xx does not support external TCXO control */
+/* LR11xx does not support external TCXO control (by the MCU) */
 #define LR11XX_CFG_TCXO(node_id)                                                                   \
 	.tcxo_cfg = {                                                                              \
 		.xosc_cfg = COND_CODE_1(DT_PROP(node_id, tcxo_wakeup_time) == 0,                   \
