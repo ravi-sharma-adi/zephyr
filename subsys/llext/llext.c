@@ -160,6 +160,9 @@ int llext_load(struct llext_loader *ldr, const char *name, struct llext **ext,
 		goto out;
 	}
 
+	strncpy((*ext)->name, name, sizeof((*ext)->name));
+	(*ext)->name[sizeof((*ext)->name) - 1] = '\0';
+
 	ret = do_llext_load(ldr, *ext, ldr_parm);
 	if (ret < 0) {
 		llext_free(*ext);
@@ -167,10 +170,7 @@ int llext_load(struct llext_loader *ldr, const char *name, struct llext **ext,
 		goto out;
 	}
 
-	strncpy((*ext)->name, name, sizeof((*ext)->name));
-	(*ext)->name[sizeof((*ext)->name) - 1] = '\0';
 	(*ext)->use_count++;
-
 	sys_slist_append(&_llext_list, &(*ext)->_llext_list);
 	LOG_INF("Loaded extension %s", (*ext)->name);
 
