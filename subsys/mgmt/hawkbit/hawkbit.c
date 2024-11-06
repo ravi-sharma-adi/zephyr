@@ -834,7 +834,7 @@ int hawkbit_init(void)
 		}
 
 		LOG_DBG("Marked current image as OK");
-		ret = boot_erase_img_bank(FIXED_PARTITION_ID(SLOT1_LABEL));
+		ret = boot_erase_img_bank(flash_img_get_upload_slot());
 		if (ret < 0) {
 			LOG_ERR("Failed to erase second slot: %d", ret);
 			return ret;
@@ -1449,7 +1449,7 @@ enum hawkbit_response hawkbit_probe(void)
 	/* Verify the hash of the stored firmware */
 	fic.match = hb_context.dl.file_hash;
 	fic.clen = hb_context.dl.downloaded_size;
-	if (flash_img_check(&hb_context.flash_ctx, &fic, FIXED_PARTITION_ID(SLOT1_LABEL))) {
+	if (flash_img_check(&hb_context.flash_ctx, &fic, hb_context.flash_ctx.flash_area->fa_id)) {
 		LOG_ERR("Failed to validate stored firmware");
 		hb_context.code_status = HAWKBIT_DOWNLOAD_ERROR;
 		goto cleanup;
