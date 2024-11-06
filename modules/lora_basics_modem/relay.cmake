@@ -1,6 +1,7 @@
 # Copyright (c) 2024 Semtech Corporation - Félix Piédallu
 # SPDX-License-Identifier: Apache-2.0
 
+# Used in publicly-included headers
 zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_RELAY_TX
   RELAY_TX
 )

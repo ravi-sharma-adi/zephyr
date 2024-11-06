@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Used by LBM
-zephyr_compile_definitions(SX126X)
-zephyr_compile_definitions(SX126X_TRANSCEIVER)
-zephyr_compile_definitions(SX126X_DISABLE_WARNINGS)
+zephyr_library_compile_definitions(SX126X)
+zephyr_library_compile_definitions(SX126X_TRANSCEIVER)
+zephyr_library_compile_definitions(SX126X_DISABLE_WARNINGS)
+
+# Used in publicly-included headers
 zephyr_compile_definitions_ifdef(CONFIG_DT_HAS_SEMTECH_SX1261_NEW_ENABLED SX1261)
 zephyr_compile_definitions_ifdef(CONFIG_DT_HAS_SEMTECH_SX1262_NEW_ENABLED SX1262)
 zephyr_compile_definitions_ifdef(CONFIG_DT_HAS_SEMTECH_SX1268_NEW_ENABLED SX1268)
