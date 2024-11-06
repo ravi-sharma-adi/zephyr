@@ -173,6 +173,13 @@ void smtc_modem_hal_irq_reset_radio_irq(void);
  */
 void smtc_modem_hal_interruptible_msleep(k_timeout_t timeout);
 
+/**
+ * @brief If smtc_modem_hal_interruptible_msleep is running, interrupt it.
+ *
+ * This function is used to trigger the LoRa Basics Modem stack when an event occurs,
+ * whether it is an interrupt from the transceiver, a timer or a user request.
+ *
+ */
 void smtc_modem_hal_wake_up(void);
 
 #ifdef __cplusplus
