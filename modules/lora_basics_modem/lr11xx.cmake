@@ -18,10 +18,12 @@ zephyr_library_sources(
 )
 
 # LR1121 is the only one not supporting GNSS and WiFi
-zephyr_library_sources_ifndef(CONFIG_DT_HAS_SEMTECH_LR1121_ENABLED
-  ${LBM_LR11XX_DIR}/lr11xx_wifi.c
-  ${LBM_LR11XX_DIR}/lr11xx_gnss.c
-)
+if(CONFIG_DT_HAS_SEMTECH_LR1110_ENABLED OR CONFIG_DT_HAS_SEMTECH_LR1120_ENABLED)
+  zephyr_library_sources(
+    ${LBM_LR11XX_DIR}/lr11xx_wifi.c
+    ${LBM_LR11XX_DIR}/lr11xx_gnss.c
+  )
+endif()
 
 set(LBM_RAL_SOURCES ${LBM_SMTC_MODEM_CORE_DIR}/smtc_ral/src/ral_lr11xx.c)
 set(LBM_RALF_SOURCES ${LBM_SMTC_MODEM_CORE_DIR}/smtc_ralf/src/ralf_lr11xx.c)
