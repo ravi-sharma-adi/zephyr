@@ -17,7 +17,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/relay.cmake)
 # Common
 #-----------------------------------------------------------------------------
 
-zephyr_compile_definitions(NUMBER_OF_STACKS=${CONFIG_LORA_BASICS_MODEM_NUMBER_OF_STACKS})
+zephyr_library_compile_definitions(NUMBER_OF_STACKS=${CONFIG_LORA_BASICS_MODEM_NUMBER_OF_STACKS})
 
 # SMTC_MODEM_CORE_C_SOURCES
 zephyr_library_sources(
@@ -82,7 +82,7 @@ zephyr_include_directories(
 # ALCSync
 #-----------------------------------------------------------------------------
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_ALC_SYNC
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_ALC_SYNC
   ADD_SMTC_ALC_SYNC
 )
 
@@ -102,23 +102,23 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_ALC_SYNC
 # FUOTA
 #-----------------------------------------------------------------------------
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA
   ADD_FUOTA=${CONFIG_LORA_BASICS_MODEM_FUOTA_VERSION}
 )
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_FMP
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_FMP
   ENABLE_FUOTA_FMP
 )
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_MPA
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_MPA
   ENABLE_FUOTA_MPA
 )
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_NB_OF_FRAGMENTS_CONFIG
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_NB_OF_FRAGMENTS_CONFIG
   FRAG_MAX_NB=${CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_NB_OF_FRAGMENTS}
 )
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_SIZE_OF_FRAGMENTS
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_SIZE_OF_FRAGMENTS
   FRAG_MAX_SIZE=${CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_SIZE_OF_FRAGMENTS}
 )
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_FRAGMENTS_REDUNDANCY
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_FRAGMENTS_REDUNDANCY
   FRAG_MAX_REDUNDANCY=${CONFIG_LORA_BASICS_MODEM_FUOTA_MAX_FRAGMENTS_REDUNDANCY}
 )
 
@@ -175,6 +175,7 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_CRYPTOGRAPHY_SOFT
 # Class B
 #-----------------------------------------------------------------------------
 
+# Used in publicly-included headers
 zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_CLASS_B
   ADD_CLASS_B
 )
@@ -193,6 +194,7 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_CLASS_B
 # Class C
 #-----------------------------------------------------------------------------
 
+# Used in publicly-included headers
 zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_CLASS_C
   ADD_CLASS_C
 )
@@ -209,6 +211,7 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_CLASS_C
 # Multicast
 #-----------------------------------------------------------------------------
 
+# Used in publicly-included headers
 zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_MULTICAST
   SMTC_MULTICAST
 )
@@ -225,10 +228,11 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_MULTICAST
 # CSMA
 #-----------------------------------------------------------------------------
 
+# Used in publicly-included headers
 zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_CSMA
   ADD_CSMA
 )
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_CSMA_BY_DEFAULT
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_CSMA_BY_DEFAULT
   ENABLE_CSMA_BY_DEFAULT
 )
 
@@ -240,6 +244,7 @@ zephyr_library_sources_ifdef(CONFIG_LORA_BASICS_MODEM_CSMA
 # Almanac
 #-----------------------------------------------------------------------------
 
+# Used in publicly-included headers
 zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_ALMANAC
   ADD_ALMANAC
 )
@@ -257,7 +262,7 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_ALMANAC
 # Stream
 #-----------------------------------------------------------------------------
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_STREAM
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_STREAM
   ADD_SMTC_STREAM
 )
 
@@ -275,7 +280,7 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_STREAM
 # Large File Upload
 #-----------------------------------------------------------------------------
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_LFU
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_LFU
   ADD_SMTC_LFU
 )
 zephyr_library_sources_ifdef(CONFIG_LORA_BASICS_MODEM_LFU
@@ -290,7 +295,7 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_LFU
 # Device Management
 #-----------------------------------------------------------------------------
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_DEVICE_MANAGEMENT
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_DEVICE_MANAGEMENT
   ADD_SMTC_CLOUD_DEVICE_MANAGEMENT
 )
 zephyr_library_sources_ifdef(CONFIG_LORA_BASICS_MODEM_DEVICE_MANAGEMENT
@@ -305,6 +310,10 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_DEVICE_MANAGEMENT
 # Geolocation
 #-----------------------------------------------------------------------------
 
+# Used in publicly-included headers
+zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_GEOLOCATION
+  ADD_LBM_GEOLOCATION
+)
 zephyr_library_sources_ifdef(CONFIG_LORA_BASICS_MODEM_GEOLOCATION
   ${LBM_SMTC_MODEM_CORE_DIR}/geolocation_services/mw_common.c
   ${LBM_SMTC_MODEM_CORE_DIR}/geolocation_services/mw_gnss_scan.c
@@ -318,15 +327,12 @@ zephyr_library_sources_ifdef(CONFIG_LORA_BASICS_MODEM_GEOLOCATION
 zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_GEOLOCATION
   ${LBM_SMTC_MODEM_CORE_DIR}/geolocation_services
 )
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_GEOLOCATION
-  ADD_LBM_GEOLOCATION
-)
 
 #-----------------------------------------------------------------------------
 # Store and Forward
 #-----------------------------------------------------------------------------
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_STORE_AND_FORWARD
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_STORE_AND_FORWARD
   ADD_SMTC_STORE_AND_FORWARD
 )
 zephyr_library_sources_ifdef(CONFIG_LORA_BASICS_MODEM_STORE_AND_FORWARD
@@ -342,7 +348,7 @@ zephyr_include_directories_ifdef(CONFIG_LORA_BASICS_MODEM_STORE_AND_FORWARD
 # Beacon TX
 #-----------------------------------------------------------------------------
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_BEACON_TX
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_BEACON_TX
   MODEM_BEACON_APP
 )
 
@@ -358,11 +364,12 @@ zephyr_library_sources_ifdef(CONFIG_LORA_BASICS_MODEM_MULTICAST
 # Misc
 #-----------------------------------------------------------------------------
 
+# Used in publicly-included headers
 zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_PERF_TEST
   PERF_TEST_ENABLED
 )
 
-zephyr_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_DISABLE_JOIN_DUTY_CYCLE
+zephyr_library_compile_definitions_ifdef(CONFIG_LORA_BASICS_MODEM_DISABLE_JOIN_DUTY_CYCLE
   TEST_BYPASS_JOIN_DUTY_CYCLE
 )
 
@@ -378,15 +385,15 @@ endif()
 #-----------------------------------------------------------------------------
 
 if(${CONFIG_LORA_BASICS_MODEM_LOG_LEVEL_DBG})
-  zephyr_compile_definitions(MODEM_HAL_DBG_TRACE=1)
+  zephyr_library_compile_definitions(MODEM_HAL_DBG_TRACE=1)
 else()
-  zephyr_compile_definitions(MODEM_HAL_DBG_TRACE=0)
+  zephyr_library_compile_definitions(MODEM_HAL_DBG_TRACE=0)
 endif()
 
 if(${CONFIG_LORA_BASICS_MODEM_LOG_LEVEL_DEEP_DBG})
-  zephyr_compile_definitions(MODEM_HAL_DEEP_DBG_TRACE=1)
+  zephyr_library_compile_definitions(MODEM_HAL_DEEP_DBG_TRACE=1)
 else()
-  zephyr_compile_definitions(MODEM_HAL_DEEP_DBG_TRACE=0)
+  zephyr_library_compile_definitions(MODEM_HAL_DEEP_DBG_TRACE=0)
 endif()
 
 #-----------------------------------------------------------------------------
