@@ -94,7 +94,7 @@ void smtc_modem_hal_register_callbacks(struct smtc_modem_hal_cb *hal_cb)
 void smtc_modem_hal_reset_mcu(void)
 {
 	LOG_WRN("Resetting the MCU");
-	k_sleep(K_SECONDS(1)); /* Sleep a bit so logs are printed. */
+	log_panic(); /* To flush the logs */
 	sys_reboot(SYS_REBOOT_COLD);
 }
 
