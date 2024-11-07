@@ -21,13 +21,15 @@ struct dev_data_hfxo {
 	onoff_notify_fn notify;
 	struct k_timer timer;
 	struct clock_lrcconf_sink lrcconf_sink;
+	k_timeout_t start_up_time;
 };
 
 struct dev_config_hfxo {
 	uint32_t fixed_frequency;
 	uint16_t fixed_accuracy;
-	k_timeout_t start_up_time;
 };
+
+static const NRF_BICR_Type *bicr = (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr));
 
 static void hfxo_start_up_timer_handler(struct k_timer *timer)
 {
@@ -52,8 +54,6 @@ static void onoff_start_hfxo(struct onoff_manager *mgr, onoff_notify_fn notify)
 {
 	struct dev_data_hfxo *dev_data =
 		CONTAINER_OF(mgr, struct dev_data_hfxo, mgr);
-	const struct device *dev = DEVICE_DT_INST_GET(0);
-	const struct dev_config_hfxo *dev_config = dev->config;
 
 	dev_data->notify = notify;
 
@@ -65,7 +65,7 @@ static void onoff_start_hfxo(struct onoff_manager *mgr, onoff_notify_fn notify)
 	 * unreliable. Hence the timer is used to simply wait the expected
 	 * start-up time. To be removed once the hardware is fixed.
 	 */
-	k_timer_start(&dev_data->timer, dev_config->start_up_time, K_NO_WAIT);
+	k_timer_start(&dev_data->timer, dev_data->start_up_time, K_NO_WAIT);
 }
 
 static void onoff_stop_hfxo(struct onoff_manager *mgr, onoff_notify_fn notify)
@@ -159,12 +159,20 @@ static int init_hfxo(const struct device *dev)
 		.start = onoff_start_hfxo,
 		.stop = onoff_stop_hfxo
 	};
+	uint32_t start_up_time;
 	int rc;
 
 	rc = onoff_manager_init(&dev_data->mgr, &transitions);
 	if (rc < 0) {
 		return rc;
 	}
+
+	start_up_time = bicr->HFXO.STARTUPTIME;
+	if (start_up_time == BICR_HFXO_STARTUPTIME_TIME_Unconfigured) {
+		return -EINVAL;
+	}
+
+	dev_data->start_up_time = K_USEC(start_up_time);
 
 	k_timer_init(&dev_data->timer, hfxo_start_up_timer_handler, NULL);
 
@@ -187,7 +195,6 @@ static struct dev_data_hfxo data_hfxo;
 static const struct dev_config_hfxo config_hfxo = {
 	.fixed_frequency = DT_INST_PROP(0, clock_frequency),
 	.fixed_accuracy = DT_INST_PROP(0, accuracy_ppm),
-	.start_up_time = K_USEC(DT_INST_PROP(0, startup_time_us)),
 };
 
 DEVICE_DT_INST_DEFINE(0, init_hfxo, NULL,
