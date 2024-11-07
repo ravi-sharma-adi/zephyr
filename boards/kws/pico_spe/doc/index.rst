@@ -41,7 +41,7 @@ Hardware
 Supported Features
 ==================
 
-The pico_spe board configuration supports the following
+The ``pico_spe`` board target supports the following
 hardware features:
 
 .. list-table::
@@ -133,7 +133,7 @@ Zephyr does not (currently) assemble PIO programs. Rather, they should be
 manually assembled and embedded in source code. An example of how this is done
 can be found at :zephyr_file:`drivers/serial/uart_rpi_pico_pio.c`.
 
-Sample:  SPI via PIO
+Sample: SPI via PIO
 ====================
 
 The :zephyr_file:`samples/sensor/bme280/README.rst` sample includes a
