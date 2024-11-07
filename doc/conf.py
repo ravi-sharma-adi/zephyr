@@ -1,11 +1,11 @@
 # Zephyr documentation build configuration file.
 # Reference: https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import sys
 import os
-from pathlib import Path
 import re
+import sys
 import textwrap
+from pathlib import Path
 
 ZEPHYR_BASE = Path(__file__).resolve().parents[1]
 ZEPHYR_BUILD = Path(os.environ.get("OUTPUT_DIR")).resolve()
@@ -25,7 +25,7 @@ sys.path.insert(0, str(ZEPHYR_BASE / "scripts" / "west_commands"))
 # Add the directory which contains the pytest-twister-pytest
 sys.path.insert(0, str(ZEPHYR_BASE / "scripts" / "pylib" / "pytest-twister-harness" / "src"))
 
-import redirects
+import redirects  # noqa: E402
 
 try:
     import west as west_found
@@ -179,9 +179,9 @@ html_additional_pages = {
     "gsearch": "gsearch.html"
 }
 
-is_release = tags.has("release")  # pylint: disable=undefined-variable
+is_release = tags.has("release")  # pylint: disable=undefined-variable  # noqa: F821
 reference_prefix = ""
-if tags.has("publish"):  # pylint: disable=undefined-variable
+if tags.has("publish"):  # pylint: disable=undefined-variable  # noqa: F821
     reference_prefix = f"/{version}" if is_release else "/latest"
 docs_title = "Docs / {}".format(version if is_release else "Latest")
 html_context = {
@@ -212,8 +212,8 @@ html_context = {
 
 latex_elements = {
     "papersize": "a4paper",
-    "maketitle": open(ZEPHYR_BASE / "doc" / "_static" / "latex" / "title.tex").read(),
-    "preamble": open(ZEPHYR_BASE / "doc" / "_static" / "latex" / "preamble.tex").read(),
+    "maketitle": (ZEPHYR_BASE / "doc" / "_static" / "latex" / "title.tex").read_text(),
+    "preamble": (ZEPHYR_BASE / "doc" / "_static" / "latex" / "preamble.tex").read_text(),
     "makeindex": r"\usepackage[columns=1]{idxlayout}\makeindex",
     "fontpkg": textwrap.dedent(r"""
                                     \usepackage{noto}
@@ -270,7 +270,7 @@ notfound_urls_prefix = f"/{version}/" if is_release else "/latest/"
 # -- Options for zephyr.gh_utils ------------------------------------------
 
 gh_link_version = f"v{version}" if is_release else "main"
-gh_link_base_url = f"https://github.com/zephyrproject-rtos/zephyr"
+gh_link_base_url = "https://github.com/zephyrproject-rtos/zephyr"
 gh_link_prefixes = {
     "samples/.*": "",
     "boards/.*": "",
