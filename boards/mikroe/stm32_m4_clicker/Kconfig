@@ -1,8 +1,10 @@
-# Copyright (c) 2024 Ian Morris
+# Copyright (c) 2024 Nordic Semiconductor ASA
 # SPDX-License-Identifier: Apache-2.0
 
 if BOARD_MIKROE_STM32_M4_CLICKER
 
-source "${ZEPHYR_BASE}/boards/common/usb/Kconfig.cdc_acm_serial"
+config BOARD_NEED_SERIAL_BACKEND_CDC_ACM
+	bool
+	default y
 
 endif # BOARD_MIKROE_STM32_M4_CLICKER

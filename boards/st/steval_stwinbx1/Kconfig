@@ -5,8 +5,8 @@
 
 if BOARD_STEVAL_STWINBX1
 
-config BOARD_SERIAL_BACKEND_CDC_ACM
-	bool "Use USB CDC as serial console backend"
+config BOARD_NEED_SERIAL_BACKEND_CDC_ACM
+	bool
 	default y
 
 endif # BOARD_STEVAL_STWINBX1
