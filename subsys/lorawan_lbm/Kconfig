@@ -287,7 +287,7 @@ config LORA_BASICS_MODEM_RELAY_TX
 #-----------------------------------------------------------------------------
 
 config LORA_BASICS_MODEM_NUMBER_OF_STACKS
-	int "Number of LoRa Basics Modem stacks (only 1 is supported for now)"
+	int # "Number of LoRa Basics Modem stacks (only 1 is supported for now)"
 	default 1
 	help
 	 Number of stacks to be used by the modem library.
