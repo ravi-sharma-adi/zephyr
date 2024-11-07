@@ -133,10 +133,27 @@ static const struct bt_data ad[] = {
 
 static int setup_extended_adv(struct bt_le_ext_adv **adv)
 {
+	/* Zephyr Controller works best while Extended Advertising interval to be a multiple
+	 * of the ISO Interval minus 10 ms (max. advertising random delay). This is
+	 * required to place the AUX_ADV_IND PDUs in a non-overlapping interval with the
+	 * Broadcast ISO radio events.
+	 */
+	const struct bt_le_adv_param *ext_adv_param = BT_LE_ADV_PARAM(
+		BT_LE_ADV_OPT_EXT_ADV, BT_GAP_MS_TO_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2 - 10),
+		BT_GAP_MS_TO_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2 - 10), NULL);
+
+	/* We use BT_BAP_COEX_INT_MS_10_FAST_2 as this sample only supports using 10ms SDU
+	 * interval. BT_BAP_COEX_INT_MS_10_FAST_2 balances well between sync time (lower
+	 * interval is faster) and air time (lower interval require more air time)
+	 */
+	const struct bt_le_per_adv_param *per_adv_param =
+		BT_LE_PER_ADV_PARAM(BT_GAP_MS_TO_PER_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2),
+				    BT_GAP_MS_TO_PER_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2),
+				    BT_LE_PER_ADV_OPT_NONE);
 	int err;
 
 	/* Create a non-connectable advertising set */
-	err = bt_le_ext_adv_create(BT_LE_EXT_ADV_NCONN, NULL, adv);
+	err = bt_le_ext_adv_create(ext_adv_param, NULL, adv);
 	if (err != 0) {
 		printk("Unable to create extended advertising set: %d\n", err);
 		return err;
@@ -150,7 +167,7 @@ static int setup_extended_adv(struct bt_le_ext_adv **adv)
 	}
 
 	/* Set periodic advertising parameters */
-	err = bt_le_per_adv_set_param(*adv, BT_LE_PER_ADV_DEFAULT);
+	err = bt_le_per_adv_set_param(*adv, per_adv_param);
 	if (err) {
 		printk("Failed to set periodic advertising parameters: %d\n",
 		       err);

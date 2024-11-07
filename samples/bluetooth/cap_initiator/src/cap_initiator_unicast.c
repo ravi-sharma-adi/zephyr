@@ -566,6 +566,13 @@ BT_CONN_CB_DEFINE(conn_callbacks) = {
 
 static bool check_audio_support_and_connect_cb(struct bt_data *data, void *user_data)
 {
+	/* We use BT_BAP_COEX_INT_MS_7_5_10_FAST to best support CAP Acceptors
+	 * that support both 7.5 and 10ms SDU interval
+	 */
+	const struct bt_le_conn_param *conn_param =
+		BT_LE_CONN_PARAM(BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST),
+				 BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST), 0,
+				 BT_GAP_MS_TO_CONN_TIMEOUT(4000));
 	char addr_str[BT_ADDR_LE_STR_LEN];
 	bt_addr_le_t *addr = user_data;
 	const struct bt_uuid *uuid;
@@ -599,7 +606,7 @@ static bool check_audio_support_and_connect_cb(struct bt_data *data, void *user_
 		return false;
 	}
 
-	err = bt_conn_le_create(addr, BT_CONN_LE_CREATE_CONN, BT_LE_CONN_PARAM_DEFAULT, &peer.conn);
+	err = bt_conn_le_create(addr, BT_CONN_LE_CREATE_CONN, conn_param, &peer.conn);
 	if (err != 0) {
 		LOG_WRN("Create conn to failed: %d, restarting scan", err);
 		start_scan();

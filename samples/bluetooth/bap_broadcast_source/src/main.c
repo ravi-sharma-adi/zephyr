@@ -33,15 +33,11 @@ BUILD_ASSERT(strlen(CONFIG_BROADCAST_CODE) <= BT_ISO_BROADCAST_CODE_SIZE, "Inval
  * of the ISO Interval minus 10 ms (max. advertising random delay). This is
  * required to place the AUX_ADV_IND PDUs in a non-overlapping interval with the
  * Broadcast ISO radio events.
- *
- * I.e. for a 7.5 ms ISO interval use 90 ms minus 10 ms ==> 80 ms advertising
- * interval.
- * And, for 10 ms ISO interval, can use 90 ms minus 10 ms ==> 80 ms advertising
- * interval.
  */
 #define BT_LE_EXT_ADV_CUSTOM                                                                       \
-	BT_LE_ADV_PARAM(BT_LE_ADV_OPT_EXT_ADV, BT_GAP_MS_TO_ADV_INTERVAL(80),                      \
-			BT_GAP_MS_TO_ADV_INTERVAL(80), NULL)
+	BT_LE_ADV_PARAM(BT_LE_ADV_OPT_EXT_ADV,                                                     \
+			BT_GAP_MS_TO_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2 - 10U),             \
+			BT_GAP_MS_TO_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2 - 10U), NULL)
 
 /* When BROADCAST_ENQUEUE_COUNT > 1 we can enqueue enough buffers to ensure that
  * the controller is never idle
@@ -491,6 +487,15 @@ int main(void)
 #endif /* defined(CONFIG_LIBLC3) */
 
 	while (true) {
+		/* We use BT_BAP_COEX_INT_MS_10_FAST_2 as this sample only supports using 10ms SDU
+		 * interval. BT_BAP_COEX_INT_MS_10_FAST_2 balances well between sync time (lower
+		 * interval is faster) and air time (lower interval require more air time)
+		 */
+		const struct bt_le_per_adv_param *per_adv_param = BT_LE_PER_ADV_PARAM(
+			BT_GAP_MS_TO_PER_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2),
+			BT_GAP_MS_TO_PER_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2),
+			BT_LE_PER_ADV_OPT_NONE);
+
 		/* Broadcast Audio Streaming Endpoint advertising data */
 		NET_BUF_SIMPLE_DEFINE(ad_buf, BT_UUID_SIZE_16 + BT_AUDIO_BROADCAST_ID_SIZE);
 		NET_BUF_SIMPLE_DEFINE(base_buf, 128);
@@ -506,7 +511,7 @@ int main(void)
 		}
 
 		/* Set periodic advertising parameters */
-		err = bt_le_per_adv_set_param(adv, BT_LE_PER_ADV_DEFAULT);
+		err = bt_le_per_adv_set_param(adv, per_adv_param);
 		if (err) {
 			printk("Failed to set periodic advertising parameters (err %d)\n", err);
 			return 0;
