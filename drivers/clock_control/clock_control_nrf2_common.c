@@ -28,6 +28,8 @@ STRUCT_CLOCK_CONFIG(generic, ONOFF_CNT_MAX);
 static sys_slist_t poweron_main_list;
 static struct k_spinlock poweron_main_lock;
 
+static const NRF_BICR_Type *bicr = (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr));
+
 static void update_config(struct clock_config_generic *cfg)
 {
 	atomic_val_t prev_flags = atomic_or(&cfg->flags, FLAG_UPDATE_NEEDED);
@@ -77,6 +79,40 @@ static void onoff_stop_option(struct onoff_manager *mgr,
 static inline uint8_t get_index_of_highest_bit(uint32_t value)
 {
 	return value ? (uint8_t)(31 - __builtin_clz(value)) : 0;
+}
+
+int lfosc_get_accuracy(uint16_t *accuracy)
+{
+	switch (FIELD_GET(bicr->LFOSC.LFXOCONFIG, BICR_LFOSC_LFXOCONFIG_ACCURACY_Msk)) {
+	case BICR_LFOSC_LFXOCONFIG_ACCURACY_500ppm:
+		*accuracy = 500U;
+		break;
+	case BICR_LFOSC_LFXOCONFIG_ACCURACY_250ppm:
+		*accuracy = 250U;
+		break;
+	case BICR_LFOSC_LFXOCONFIG_ACCURACY_150ppm:
+		*accuracy = 150U;
+		break;
+	case BICR_LFOSC_LFXOCONFIG_ACCURACY_100ppm:
+		*accuracy = 100U;
+		break;
+	case BICR_LFOSC_LFXOCONFIG_ACCURACY_75ppm:
+		*accuracy = 75U;
+		break;
+	case BICR_LFOSC_LFXOCONFIG_ACCURACY_50ppm:
+		*accuracy = 50U;
+		break;
+	case BICR_LFOSC_LFXOCONFIG_ACCURACY_30ppm:
+		*accuracy = 30U;
+		break;
+	case BICR_LFOSC_LFXOCONFIG_ACCURACY_20ppm:
+		*accuracy = 20U;
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	return 0;
 }
 
 int clock_config_init(void *clk_cfg, uint8_t onoff_cnt, k_work_handler_t update_work_handler)
