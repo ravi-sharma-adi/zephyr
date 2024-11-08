@@ -88,6 +88,11 @@ static ALWAYS_INLINE void runq_remove(struct k_thread *thread)
 	_priq_run_remove(thread_runq(thread), thread);
 }
 
+static ALWAYS_INLINE void runq_yield(void)
+{
+	_priq_run_yield(curr_cpu_runq());
+}
+
 static ALWAYS_INLINE struct k_thread *runq_best(void)
 {
 	return _priq_run_best(curr_cpu_runq());
@@ -1040,11 +1045,11 @@ void z_impl_k_yield(void)
 
 	k_spinlock_key_t key = k_spin_lock(&_sched_spinlock);
 
-	if (!IS_ENABLED(CONFIG_SMP) ||
-	    z_is_thread_queued(_current)) {
-		dequeue_thread(_current);
-	}
-	queue_thread(_current);
+#ifdef CONFIG_SMP
+	z_mark_thread_as_queued(_current);
+#endif
+	runq_yield();
+
 	update_cache(1);
 	z_swap(&_sched_spinlock, key);
 }
