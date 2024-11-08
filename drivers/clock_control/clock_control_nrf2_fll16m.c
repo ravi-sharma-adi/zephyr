@@ -23,26 +23,17 @@ BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(DT_DRV_COMPAT) == 1,
 #define FLL16M_MODE_BYPASS      2
 #define FLL16M_MODE_DEFAULT     FLL16M_MODE_OPEN_LOOP
 
-#define FLL16M_LFXO_NODE DT_INST_PHANDLE_BY_NAME(0, clocks, lfxo)
 #define FLL16M_HFXO_NODE DT_INST_PHANDLE_BY_NAME(0, clocks, hfxo)
 
-#define FLL16M_HAS_LFXO DT_NODE_HAS_STATUS_OKAY(FLL16M_LFXO_NODE)
-
-#define FLL16M_LFXO_ACCURACY DT_PROP(FLL16M_LFXO_NODE, accuracy_ppm)
 #define FLL16M_HFXO_ACCURACY DT_PROP(FLL16M_HFXO_NODE, accuracy_ppm)
 #define FLL16M_OPEN_LOOP_ACCURACY DT_INST_PROP(0, open_loop_accuracy_ppm)
 #define FLL16M_CLOSED_LOOP_BASE_ACCURACY DT_INST_PROP(0, closed_loop_base_accuracy_ppm)
 #define FLL16M_MAX_ACCURACY FLL16M_HFXO_ACCURACY
 
-/* Closed-loop mode uses LFXO as source if present, HFXO otherwise */
-#if FLL16M_HAS_LFXO
-#define FLL16M_CLOSED_LOOP_ACCURACY (FLL16M_CLOSED_LOOP_BASE_ACCURACY + FLL16M_LFXO_ACCURACY)
-#else
-#define FLL16M_CLOSED_LOOP_ACCURACY (FLL16M_CLOSED_LOOP_BASE_ACCURACY + FLL16M_HFXO_ACCURACY)
-#endif
+static const NRF_BICR_Type *bicr = (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr));
 
 /* Clock options sorted from lowest to highest accuracy */
-static const struct clock_options {
+static struct clock_options {
 	uint16_t accuracy;
 	uint8_t mode;
 } clock_options[] = {
@@ -51,7 +42,6 @@ static const struct clock_options {
 		.mode = FLL16M_MODE_OPEN_LOOP,
 	},
 	{
-		.accuracy = FLL16M_CLOSED_LOOP_ACCURACY,
 		.mode = FLL16M_MODE_CLOSED_LOOP,
 	},
 	{
@@ -233,6 +223,27 @@ static int api_get_rate_fll16m(const struct device *dev,
 static int fll16m_init(const struct device *dev)
 {
 	struct fll16m_dev_data *dev_data = dev->data;
+	uint8_t lfxo_mode;
+
+	clock_options[1].accuracy = FLL16M_CLOSED_LOOP_BASE_ACCURACY;
+
+	/* Closed-loop mode uses LFXO as source if present, HFXO otherwise */
+	lfxo_mode = FIELD_GET(bicr->LFOSC.LFXOCONFIG, BICR_LFOSC_LFXOCONFIG_MODE_Msk);
+
+	if (lfxo_mode != BICR_LFOSC_LFXOCONFIG_MODE_Unconfigured &&
+	    lfxo_mode != BICR_LFOSC_LFXOCONFIG_MODE_Disabled) {
+		int ret;
+		uint16_t accuracy;
+
+		ret = lfosc_get_accuracy(&accuracy);
+		if (ret < 0) {
+			return ret;
+		}
+
+		clock_options[1].accuracy += accuracy;
+	} else {
+		clock_options[1].accuracy += FLL16M_HFXO_ACCURACY;
+	}
 
 	return clock_config_init(&dev_data->clk_cfg,
 				 ARRAY_SIZE(dev_data->clk_cfg.onoff),
