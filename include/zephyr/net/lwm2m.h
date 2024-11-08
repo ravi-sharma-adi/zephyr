@@ -182,6 +182,7 @@ enum lwm2m_rd_client_event {
 typedef void (*lwm2m_ctx_event_cb_t)(struct lwm2m_ctx *ctx,
 				     enum lwm2m_rd_client_event event);
 
+typedef int (*lwm2m_set_sockopt_cb_t)(struct lwm2m_ctx *client_ctx);
 
 /**
  * @brief Different traffic states of the LwM2M socket.
@@ -259,7 +260,7 @@ struct lwm2m_ctx {
 	 * a callback that is called after a socket is created and before
 	 * connect.
 	 */
-	int (*set_socketoptions)(struct lwm2m_ctx *client_ctx);
+	lwm2m_set_sockopt_cb_t set_socketoptions;
 
 	/** Flag to indicate if context should use DTLS.
 	 *  Enabled via the use of coaps:// protocol prefix in connection
