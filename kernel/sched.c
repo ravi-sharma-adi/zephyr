@@ -941,6 +941,9 @@ void init_ready_q(struct _ready_q *ready_q)
 	for (int i = 0; i < ARRAY_SIZE(_kernel.ready_q.runq.queues); i++) {
 		sys_dlist_init(&ready_q->runq.queues[i]);
 	}
+#ifndef CONFIG_SMP
+	ready_q->runq.prio_index = 0xFFFFFFFF;
+#endif
 #else
 	sys_dlist_init(&ready_q->runq);
 #endif
