@@ -309,11 +309,9 @@ static ALWAYS_INLINE struct k_thread *z_priq_mq_best(struct _priq_mq *pq)
 #endif
 
 	if (likely(index != 0xFFFFFFFF)) {
-		sys_dnode_t *n = sys_dlist_peek_head(&pq->queues[index]);
+		sys_dnode_t *n = sys_dlist_peek_head_not_empty(&pq->queues[index]);
 
-		if (n != NULL) {
-			return CONTAINER_OF(n, struct k_thread, base.qnode_dlist);
-		}
+		return CONTAINER_OF(n, struct k_thread, base.qnode_dlist);
 	}
 
 	return NULL;
