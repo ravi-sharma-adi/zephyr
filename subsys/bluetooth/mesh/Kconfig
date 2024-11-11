@@ -165,10 +165,14 @@ config BT_MESH_RELAY_ADV_SETS
 	int "Maximum of simultaneous relay message support"
 	default 0
 	range 0 BT_EXT_ADV_MAX_ADV_SET
-	depends on BT_MESH_RELAY
+	depends on BT_MESH_RELAY || BT_MESH_BRG_CFG_SRV
 	help
 	  Maximum of simultaneous relay message support. Requires controller support
 	  multiple advertising sets.
+
+	  Note that: The Subnet Bridge feature uses the relay advertising sets. If both the Relay
+	  feature and the Subnet Bridge feature is enabled, the added load should be taken into
+	  consideration.
 
 config BT_MESH_ADV_EXT_RELAY_USING_MAIN_ADV_SET
 	bool "Use the main advertising set to relay messages"
@@ -447,6 +451,26 @@ config BT_MESH_MSG_CACHE_SIZE
 	  Setting this value to a very large number can impact the processing time
 	  for each received network PDU and increases RAM footprint proportionately.
 
+config BT_MESH_RELAY_BUF_COUNT
+	int "Number of advertising buffers for relayed messages"
+	depends on BT_MESH_RELAY || BT_MESH_BRG_CFG_SRV
+	default 32
+	range 1 256
+	help
+	  Number of advertising buffers available for messages to be relayed.
+	  High number of advertising buffers increases the reliability of the
+	  mesh network. Low number of advertising buffers reduces the message
+	  latency on the Relay Node, but at the same time increases the amount
+	  of packet drops. When considering the message latency, also consider
+	  the values of BT_MESH_RELAY_RETRANSMIT_COUNT and
+	  BT_MESH_RELAY_RETRANSMIT_INTERVAL. A higher number of
+	  BT_MESH_RELAY_ADV_SETS allows the increase in the number of buffers
+	  while maintaining the latency.
+
+	  Note that: The Subnet Bridge feature uses the relay advertising buffers. If both the Relay
+	  feature and the Subnet Bridge feature is enabled, the added load should be taken into
+	  consideration.
+
 menuconfig BT_MESH_RELAY
 	bool "Relay support"
 	help
@@ -479,21 +503,6 @@ config BT_MESH_RELAY_RETRANSMIT_INTERVAL
 	  Controls the initial interval between retransmissions of relayed
 	  messages, in milliseconds. Can be changed through runtime
 	  configuration.
-
-config BT_MESH_RELAY_BUF_COUNT
-	int "Number of advertising buffers for relayed messages"
-	default 32
-	range 1 256
-	help
-	  Number of advertising buffers available for messages to be relayed.
-	  High number of advertising buffers increases the reliability of the
-	  mesh network. Low number of advertising buffers reduces the message
-	  latency on the Relay Node, but at the same time increases the amount
-	  of packet drops. When considering the message latency, also consider
-	  the values of BT_MESH_RELAY_RETRANSMIT_COUNT and
-	  BT_MESH_RELAY_RETRANSMIT_INTERVAL. A higher number of
-	  BT_MESH_RELAY_ADV_SETS allows the increase in the number of buffers
-	  while maintaining the latency.
 
 endif # BT_MESH_RELAY
 
