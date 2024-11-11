@@ -32,33 +32,11 @@ ZTEST(flash_map, test_flash_area_disabled_device)
 	zassert_equal(rc, -ENODEV, "Open did not fail");
 }
 
-/**
- * @brief Test flash_area_get_sectors()
- */
-ZTEST(flash_map, test_flash_area_get_sectors)
+static void layout_match(const struct device flash_dev)
 {
-	const struct flash_area *fa;
 	uint32_t sec_cnt;
+	off_t off = 0;
 	int i;
-	int rc;
-	off_t off;
-	const struct device *flash_dev;
-	const struct device *flash_dev_a = SLOT1_PARTITION_DEV;
-
-	rc = flash_area_open(SLOT1_PARTITION_ID, &fa);
-	zassert_true(rc == 0, "flash_area_open() fail");
-
-	/* First erase the area so it's ready for use. */
-	flash_dev = flash_area_get_device(fa);
-
-	/* Device obtained by label should match the one from fa object */
-	zassert_equal(flash_dev, flash_dev_a, "Device for slot1_partition do not match");
-
-	sec_cnt = ARRAY_SIZE(fs_sectors);
-	rc = flash_area_get_sectors(SLOT1_PARTITION_ID, &sec_cnt, fs_sectors);
-	zassert_true(rc == 0, "flash_area_get_sectors failed");
-
-	off = 0;
 
 	/* For each reported sector, check if it corresponds to real page on device */
 	for (i = 0; i < sec_cnt; ++i) {
@@ -75,8 +53,56 @@ ZTEST(flash_map, test_flash_area_get_sectors)
 		zassert_equal(fpi.size, fs_sectors[i].fs_size);
 		off += fs_sectors[i].fs_size;
 	}
+}
 
-	flash_area_close(fa);
+/**
+ * @brief Test flash_area_get_sectors()
+ */
+ZTEST(flash_map, test_flash_area_get_sectors)
+{
+	const struct flash_area *fa;
+	int rc;
+	const struct device *flash_dev;
+	const struct device *flash_dev_a = SLOT1_PARTITION_DEV;
+
+	fa = FIXED_PARTITION(SLOT1_PARTITION);
+
+	flash_dev = flash_area_get_device(fa);
+
+	/* Device obtained by label should match the one from fa object */
+	zassert_equal(flash_dev, flash_dev_a, "Device for slot1_partition do not match");
+
+	memset(&fs_sectors[0], 0, sizeof(fs_sectors));
+
+	sec_cnt = ARRAY_SIZE(fs_sectors);
+	rc = flash_area_get_sectors(SLOT1_PARTITION_ID, &sec_cnt, fs_sectors);
+	zassert_true(rc == 0, "flash_area_get_sectors failed");
+
+	layout_match(flash_dev);
+}
+
+ZTEST(flash_map, test_flash_area_sectors)
+{
+	const struct flash_area *fa;
+	uint32_t sec_cnt;
+	int i;
+	int rc;
+	off_t off;
+	const struct device *flash_dev;
+	const struct device *flash_dev_a = SLOT1_PARTITION_DEV;
+
+	fa = FIXED_PARTITION(SLOT1_PARTITION);
+
+	flash_dev = flash_area_get_device(fa);
+
+	/* Device obtained by label should match the one from fa object */
+	zassert_equal(flash_dev, flash_dev_a, "Device for slot1_partition do not match");
+
+	sec_cnt = ARRAY_SIZE(fs_sectors);
+	rc = flash_area_sectors(SLOT1_PARTITION_ID, &sec_cnt, fs_sectors);
+	zassert_true(rc == 0, "flash_area_get_sectors failed");
+
+	layout_match();
 }
 
 ZTEST(flash_map, test_flash_area_erased_val)
@@ -86,8 +112,7 @@ ZTEST(flash_map, test_flash_area_erased_val)
 	uint8_t val;
 	int rc;
 
-	rc = flash_area_open(SLOT1_PARTITION_ID, &fa);
-	zassert_true(rc == 0, "flash_area_open() fail");
+	fa = FIXED_PARTITION(SLOT1_PARTITION);
 
 	val = flash_area_erased_val(fa);
 
@@ -95,8 +120,6 @@ ZTEST(flash_map, test_flash_area_erased_val)
 
 	zassert_equal(param->erase_value, val,
 		      "value different than the flash erase value");
-
-	flash_area_close(fa);
 }
 
 ZTEST(flash_map, test_fixed_partition_node_macros)
@@ -118,8 +141,7 @@ ZTEST(flash_map, test_flash_area_erase_and_flatten)
 	const struct flash_area *fa;
 	const struct device *flash_dev;
 
-	rc = flash_area_open(SLOT1_PARTITION_ID, &fa);
-	zassert_true(rc == 0, "flash_area_open() fail");
+	fa = FIXED_PARTITION(SLOT1_PARTITION);
 
 	/* First erase the area so it's ready for use. */
 	flash_dev = flash_area_get_device(fa);
