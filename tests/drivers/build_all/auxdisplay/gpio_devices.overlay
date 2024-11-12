@@ -1,0 +1,39 @@
+/*
+ * Copyright (c) 2024 Chen Xingyu <hi@xingrz.me>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	test {
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		test_gpio: gpio@deadbeef {
+			compatible = "vnd,gpio";
+			gpio-controller;
+			reg = <0xdeadbeef 0x1000>;
+			#gpio-cells = <0x2>;
+			status = "okay";
+		};
+
+		test_gpio_7_segment: gpio-7-segment@33334444 {
+			compatible = "zephyr,gpio-7-segment";
+			reg = <0x33334444 0x1000>;
+			status = "okay";
+			columns = <3>;
+			rows = <1>;
+			segment-gpios = <&test_gpio 0 0>,  /* A */
+					<&test_gpio 0 0>,  /* B */
+					<&test_gpio 0 0>,  /* C */
+					<&test_gpio 0 0>,  /* D */
+					<&test_gpio 0 0>,  /* E */
+					<&test_gpio 0 0>,  /* F */
+					<&test_gpio 0 0>,  /* G */
+					<&test_gpio 0 0>;  /* DP */
+			digit-gpios = <&test_gpio 0 0>,  /* DIG1 */
+				      <&test_gpio 0 0>,  /* DIG2 */
+				      <&test_gpio 0 0>;  /* DIG3 */
+			refresh-period-ms = <1>;
+		};
+	};
+};
