@@ -153,6 +153,12 @@ config ETH_STM32_HAL_PTP_CLOCK_INIT_PRIO
 	  a dependency from the network stack that this device
 	  initializes before network stack (NET_INIT_PRIO).
 
+config ETH_STM32_HAL_SPLIT_INIT_PRIO
+	int "Second part of the ethernet initialization"
+	default 89
+	help
+		Second part of the ethernet initialization
+
 endif # SOC_SERIES_STM32F7X || SOC_SERIES_STM32H7X || SOC_SERIES_STM32H5X
 
 config ETH_STM32_MULTICAST_FILTER
