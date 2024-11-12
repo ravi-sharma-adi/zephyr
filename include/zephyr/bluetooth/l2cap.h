@@ -18,6 +18,7 @@
  * @{
  */
 
+#include <stdint.h>
 #include <sys/types.h>
 
 #include <zephyr/sys/atomic.h>
@@ -556,6 +557,52 @@ int bt_l2cap_ecred_chan_connect(struct bt_conn *conn,
  *  @return 0 in case of success or negative value in case of error.
  */
 int bt_l2cap_ecred_chan_reconfigure(struct bt_l2cap_chan **chans, uint16_t mtu);
+
+/** @brief Reconfigure Enhanced Credit Based L2CAP channels
+ *
+ *  Experimental API to reconfigure L2CAP ECRED channels with explicit MPS and
+ *  MTU values.
+ *
+ *  Pend a L2CAP ECRED reconfiguration for up to 5 channels. All provided
+ *  channels must share the same @ref bt_conn.
+ *
+ *  Cannot decrease MTU of any channel. And, cannot decrease MPS of any channel
+ *  when more than one channel is provided.
+ *
+ *  There is no dedicated callback for this operation, but whenever a peer responds to a
+ *  reconfiguration request, each channel's reconfigured() callback is invoked.
+ *
+ *  This function may block for the duration of L2CAP_RTX_TIMEOUT.
+ *
+ *  @warning Known issue: The implementation returns -EBUSY if there is a
+ *  concurrent reconfigure operation on the same connection. The caller may try
+ *  again later. The event signaling readiness is on the concurrently
+ *  reconfiguring channels, which may be unavailable to the called of this
+ *  function unless the users of this API cooperate.
+ *
+ *  @warning Known issue: The implementation returns -ENOMEM when unable to
+ *  allocate. The caller may try again later. There is no event signaling the
+ *  availability of buffers.
+ *
+ *  @warning Known issue: When more than five channels are provided, the
+ *  implementation silently ignores channels after the first five.
+ *
+ *  @kconfig_dep{CONFIG_BT_L2CAP_RECONFIGURE_EXPLICIT}
+ *
+ *  @param chans  Null-terminated array of channels to reconfigure.
+ *  @param mtu    Desired MTU. Must be at least L2CAP_ECRED_MIN_MTU.
+ *  @param mps    Desired MPS. Must be in range L2CAP_ECRED_MIN_MPS to
+ *                BT_L2CAP_RX_MTU.
+ *
+ *  @retval 0          Successfully pended operation.
+ *  @retval -EINVAL    Bad arguments. See above requirements.
+ *  @retval -ENOTCONN  Connection object is not in connected state.
+ *  @retval -EBUSY     Another outgoing reconfiguration is pending on the same
+ *                     connection.
+ *  @retval -ENOMEM    Host is out of buffers.
+ */
+int bt_l2cap_ecred_chan_reconfigure_explicit(struct bt_l2cap_chan **chans, uint16_t mtu,
+					     uint16_t mps);
 
 /** @brief Connect L2CAP channel
  *
