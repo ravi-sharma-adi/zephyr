@@ -12,12 +12,18 @@
  * That happens because EDF will be a tie-breaker
  * among two or more ready tasks of the same static
  * priority. An arbitrary positive number is chosen here.
-*/
+ */
 
-#define EDF_PRIORITY			5
-#define INACTIVE				-1
-#define MSEC_TO_CYC(msec)		k_ms_to_cyc_near32(msec)
-#define MSEC_TO_USEC(msec)		(msec * USEC_PER_MSEC)
+#define EDF_PRIORITY       5
+#define INACTIVE           -1
+#define MSEC_TO_CYC(msec)  k_ms_to_cyc_near32(msec)
+#define MSEC_TO_USEC(msec) (msec * USEC_PER_MSEC)
+
+#ifdef CONFIG_TIMER_HAS_64BIT_CYCLE_COUNTER
+#define clock() k_cycle_get_64()
+#else
+#define clock() k_cycle_get_32()
+#endif
 
 typedef struct {
 	int id;
@@ -29,6 +35,5 @@ typedef struct {
 	struct k_msgq queue;
 	struct k_timer timer;
 } edf_t;
-
 
 #endif
