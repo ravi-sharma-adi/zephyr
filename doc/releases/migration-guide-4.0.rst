@@ -601,5 +601,10 @@ JWT (JSON Web Token)
   They replace the previously-existing Kconfigs ``CONFIG_JWT_SIGN_RSA`` and
   ``CONFIG_JWT_SIGN_ECDSA``. (:github:`79653`)
 
+ZBus
+====
+
+ * :kconfig:option:`CONFIG_ZBUS_RUNTIME_OBSERVERS` no longer requires the system heap to exist.
+
 Architectures
 *************
