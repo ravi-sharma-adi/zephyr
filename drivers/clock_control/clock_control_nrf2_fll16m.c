@@ -8,6 +8,7 @@
 #include "clock_control_nrf2_common.h"
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/clock_control/nrf_clock_control.h>
+#include <hal/nrf_bicr.h>
 #include <hal/nrf_lrcconf.h>
 
 #include <zephyr/logging/log.h>
@@ -30,7 +31,7 @@ BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(DT_DRV_COMPAT) == 1,
 #define FLL16M_CLOSED_LOOP_BASE_ACCURACY DT_INST_PROP(0, closed_loop_base_accuracy_ppm)
 #define FLL16M_MAX_ACCURACY FLL16M_HFXO_ACCURACY
 
-static const NRF_BICR_Type *bicr = (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr));
+#define BICR (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr))
 
 /* Clock options sorted from lowest to highest accuracy */
 static struct clock_options {
@@ -223,15 +224,15 @@ static int api_get_rate_fll16m(const struct device *dev,
 static int fll16m_init(const struct device *dev)
 {
 	struct fll16m_dev_data *dev_data = dev->data;
-	uint8_t lfxo_mode;
+	nrf_bicr_lfosc_mode_t lfosc_mode;
 
 	clock_options[1].accuracy = FLL16M_CLOSED_LOOP_BASE_ACCURACY;
 
 	/* Closed-loop mode uses LFXO as source if present, HFXO otherwise */
-	lfxo_mode = FIELD_GET(bicr->LFOSC.LFXOCONFIG, BICR_LFOSC_LFXOCONFIG_MODE_Msk);
+	lfosc_mode = nrf_bicr_lfosc_mode_get(BICR);
 
-	if (lfxo_mode != BICR_LFOSC_LFXOCONFIG_MODE_Unconfigured &&
-	    lfxo_mode != BICR_LFOSC_LFXOCONFIG_MODE_Disabled) {
+	if (lfosc_mode != NRF_BICR_LFOSC_MODE_UNCONFIGURED &&
+	    lfosc_mode != NRF_BICR_LFOSC_MODE_DISABLED) {
 		int ret;
 		uint16_t accuracy;
 
