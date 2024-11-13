@@ -4,6 +4,7 @@
  */
 
 #include "clock_control_nrf2_common.h"
+#include <hal/nrf_bicr.h>
 #include <hal/nrf_lrcconf.h>
 
 #include <zephyr/logging/log.h>
@@ -28,7 +29,7 @@ STRUCT_CLOCK_CONFIG(generic, ONOFF_CNT_MAX);
 static sys_slist_t poweron_main_list;
 static struct k_spinlock poweron_main_lock;
 
-static const NRF_BICR_Type *bicr = (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr));
+#define BICR (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr))
 
 static void update_config(struct clock_config_generic *cfg)
 {
@@ -83,29 +84,29 @@ static inline uint8_t get_index_of_highest_bit(uint32_t value)
 
 int lfosc_get_accuracy(uint16_t *accuracy)
 {
-	switch (FIELD_GET(bicr->LFOSC.LFXOCONFIG, BICR_LFOSC_LFXOCONFIG_ACCURACY_Msk)) {
-	case BICR_LFOSC_LFXOCONFIG_ACCURACY_500ppm:
+	switch (nrf_bicr_lfosc_accuracy_get(BICR)) {
+	case NRF_BICR_LFOSC_ACCURACY_500PPM:
 		*accuracy = 500U;
 		break;
-	case BICR_LFOSC_LFXOCONFIG_ACCURACY_250ppm:
+	case NRF_BICR_LFOSC_ACCURACY_250PPM:
 		*accuracy = 250U;
 		break;
-	case BICR_LFOSC_LFXOCONFIG_ACCURACY_150ppm:
+	case NRF_BICR_LFOSC_ACCURACY_150PPM:
 		*accuracy = 150U;
 		break;
-	case BICR_LFOSC_LFXOCONFIG_ACCURACY_100ppm:
+	case NRF_BICR_LFOSC_ACCURACY_100PPM:
 		*accuracy = 100U;
 		break;
-	case BICR_LFOSC_LFXOCONFIG_ACCURACY_75ppm:
+	case NRF_BICR_LFOSC_ACCURACY_75PPM:
 		*accuracy = 75U;
 		break;
-	case BICR_LFOSC_LFXOCONFIG_ACCURACY_50ppm:
+	case NRF_BICR_LFOSC_ACCURACY_50PPM:
 		*accuracy = 50U;
 		break;
-	case BICR_LFOSC_LFXOCONFIG_ACCURACY_30ppm:
+	case NRF_BICR_LFOSC_ACCURACY_30PPM:
 		*accuracy = 30U;
 		break;
-	case BICR_LFOSC_LFXOCONFIG_ACCURACY_20ppm:
+	case NRF_BICR_LFOSC_ACCURACY_20PPM:
 		*accuracy = 20U;
 		break;
 	default:
