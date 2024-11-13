@@ -11,6 +11,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(clock_control_nrf2, CONFIG_CLOCK_CONTROL_LOG_LEVEL);
 
+#include <hal/nrf_bicr.h>
 #include <hal/nrf_lrcconf.h>
 
 BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(DT_DRV_COMPAT) == 1,
@@ -29,7 +30,7 @@ struct dev_config_hfxo {
 	uint16_t fixed_accuracy;
 };
 
-static const NRF_BICR_Type *bicr = (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr));
+#define BICR (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr))
 
 static void hfxo_start_up_timer_handler(struct k_timer *timer)
 {
@@ -167,8 +168,8 @@ static int init_hfxo(const struct device *dev)
 		return rc;
 	}
 
-	start_up_time = bicr->HFXO.STARTUPTIME;
-	if (start_up_time == BICR_HFXO_STARTUPTIME_TIME_Unconfigured) {
+	start_up_time = nrf_bicr_hfxo_startup_time_us_get(BICR);
+	if (start_up_time == NRF_BICR_HFXO_STARTUP_TIME_UNCONFIGURED) {
 		return -EINVAL;
 	}
 
