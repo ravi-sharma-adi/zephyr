@@ -48,8 +48,6 @@ enum {
 	ADV_FLAG_SENT,
 	/** Currently performing proxy advertising */
 	ADV_FLAG_PROXY,
-	/** The send-call has been pending. */
-	ADV_FLAG_SCHEDULE_PENDING,
 	/** Custom adv params have been set, we need to update the parameters on
 	 *  the next send.
 	 */
@@ -265,13 +263,11 @@ static bool schedule_send_with_mask(struct bt_mesh_ext_adv *ext_adv, int ignore_
 	}
 
 	if (atomic_test_bit(ext_adv->flags, ADV_FLAG_ACTIVE)) {
-		atomic_set_bit(ext_adv->flags, ADV_FLAG_SCHEDULE_PENDING);
 		return false;
 	} else if ((~ignore_mask) & k_work_busy_get(&ext_adv->work)) {
 		return false;
 	}
 
-	atomic_clear_bit(ext_adv->flags, ADV_FLAG_SCHEDULE_PENDING);
 	bt_mesh_wq_submit(&ext_adv->work);
 
 	return true;
@@ -346,7 +342,8 @@ static void send_pending_adv(struct k_work *work)
 		atomic_set_bit(ext_adv->flags, ADV_FLAG_PROXY);
 	}
 
-	if (atomic_test_and_clear_bit(ext_adv->flags, ADV_FLAG_SCHEDULE_PENDING)) {
+	/* Maybe have messages coming during starting Proxy Advertising */
+	if (!bt_mesh_adv_is_empty_by_tag(ext_adv->tags)) {
 		schedule_send_with_mask(ext_adv, K_WORK_RUNNING);
 	}
 }

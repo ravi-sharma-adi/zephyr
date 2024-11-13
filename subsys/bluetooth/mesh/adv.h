@@ -87,6 +87,7 @@ void bt_mesh_adv_send_end(int err, struct bt_mesh_adv_ctx const *ctx);
 struct bt_mesh_adv *bt_mesh_adv_get(k_timeout_t timeout);
 
 struct bt_mesh_adv *bt_mesh_adv_get_by_tag(enum bt_mesh_adv_tag_bit tags, k_timeout_t timeout);
+bool bt_mesh_adv_is_empty_by_tag(enum bt_mesh_adv_tag_bit tags);
 
 void bt_mesh_adv_gatt_update(void);
 
