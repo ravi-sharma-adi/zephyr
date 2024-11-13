@@ -95,6 +95,11 @@ __syscall void log_panic(void);
  */
 __syscall bool log_process(void);
 
+ /**
+  * @brief Process all pending log messages
+  */
+void log_flush(void);
+
 /**
  * @brief Return number of buffered log messages.
  *
