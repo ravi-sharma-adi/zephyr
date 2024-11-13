@@ -8,6 +8,7 @@
 #include "clock_control_nrf2_common.h"
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/clock_control/nrf_clock_control.h>
+#include <hal/nrf_bicr.h>
 #include <nrfs_clock.h>
 
 #include <zephyr/logging/log.h>
@@ -27,7 +28,7 @@ BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(DT_DRV_COMPAT) == 1,
 
 #define NRFS_CLOCK_TIMEOUT K_MSEC(CONFIG_CLOCK_CONTROL_NRF2_NRFS_CLOCK_TIMEOUT_MS)
 
-static const NRF_BICR_Type *bicr = (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr));
+#define BICR (NRF_BICR_Type *)DT_REG_ADDR(DT_NODELABEL(bicr))
 
 /* Clock options sorted from lowest to highest accuracy/precision */
 static struct clock_options {
@@ -192,7 +193,7 @@ static int api_get_rate_lfclk(const struct device *dev,
 static int lfclk_init(const struct device *dev)
 {
 	struct lfclk_dev_data *dev_data = dev->data;
-	uint8_t lfxo_mode;
+	nrf_bicr_lfosc_mode_t lfosc_mode;
 	nrfs_err_t res;
 
 	res = nrfs_clock_init(clock_evt_handler);
@@ -202,10 +203,10 @@ static int lfclk_init(const struct device *dev)
 
 	dev_data->clock_options_cnt = LFCLK_DEF_OPTS;
 
-	lfxo_mode = FIELD_GET(bicr->LFOSC.LFXOCONFIG, BICR_LFOSC_LFXOCONFIG_MODE_Msk);
+	lfosc_mode = nrf_bicr_lfosc_mode_get(BICR);
 
-	if (lfxo_mode == BICR_LFOSC_LFXOCONFIG_MODE_Unconfigured ||
-	    lfxo_mode == BICR_LFOSC_LFXOCONFIG_MODE_Disabled) {
+	if (lfosc_mode == NRF_BICR_LFOSC_MODE_UNCONFIGURED ||
+	    lfosc_mode == NRF_BICR_LFOSC_MODE_DISABLED) {
 		dev_data->max_accuracy = LFCLK_HFXO_ACCURACY;
 	} else {
 		int ret;
@@ -216,8 +217,8 @@ static int lfclk_init(const struct device *dev)
 			return ret;
 		}
 
-		switch (lfxo_mode) {
-		case BICR_LFOSC_LFXOCONFIG_MODE_Crystal:
+		switch (lfosc_mode) {
+		case NRF_BICR_LFOSC_MODE_CRYSTAL:
 			clock_options[LFCLK_MAX_OPTS - 2].accuracy = dev_data->max_accuracy;
 			clock_options[LFCLK_MAX_OPTS - 2].precision = 0;
 			clock_options[LFCLK_MAX_OPTS - 2].src = NRFS_CLOCK_SRC_LFCLK_XO_PIERCE;
@@ -228,7 +229,7 @@ static int lfclk_init(const struct device *dev)
 
 			dev_data->clock_options_cnt += 2;
 			break;
-		case BICR_LFOSC_LFXOCONFIG_MODE_ExtSine:
+		case NRF_BICR_LFOSC_MODE_EXTSINE:
 			clock_options[LFCLK_MAX_OPTS - 2].accuracy = dev_data->max_accuracy;
 			clock_options[LFCLK_MAX_OPTS - 2].precision = 0;
 			clock_options[LFCLK_MAX_OPTS - 2].src = NRFS_CLOCK_SRC_LFCLK_XO_EXT_SINE;
@@ -239,7 +240,7 @@ static int lfclk_init(const struct device *dev)
 
 			dev_data->clock_options_cnt += 2;
 			break;
-		case BICR_LFOSC_LFXOCONFIG_MODE_ExtSquare:
+		case NRF_BICR_LFOSC_MODE_EXTSQUARE:
 			clock_options[LFCLK_MAX_OPTS - 2].accuracy = dev_data->max_accuracy;
 			clock_options[LFCLK_MAX_OPTS - 2].precision = 0;
 			clock_options[LFCLK_MAX_OPTS - 2].src = NRFS_CLOCK_SRC_LFCLK_XO_EXT_SQUARE;
