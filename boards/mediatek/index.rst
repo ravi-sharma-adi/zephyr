@@ -67,12 +67,12 @@ my mt8186 device named "steelix":
 
 .. code-block:: console
 
-   user@dev_host:~$ west build -b mt8186_adsp samples/hello_world
+   user@dev_host:~$ west build -b mt8186//adsp samples/hello_world
    ...
    ... # build output
    ...
    user@dev_host:~$ scp build/zephyr/zephyr.img root@steelix:
-   user@dev_host:~$ scp soc/mediatek/mtk_adsp/mtk_adsp_load.py root@steelix:
+   user@dev_host:~$ scp soc/mediatek/mt8xxx/mtk_adsp_load.py root@steelix:
    user@dev_host:~$ ssh steelix
 
    root@steelix:~ # ./mtk_adsp_load.py load zephyr.img
@@ -94,7 +94,7 @@ Toolchains
 **********
 
 The MT8195 toolchain is already part of the Zephyr SDK, so builds for
-the ``mt8195_adsp`` board should work out of the box simply following
+the ``mt8195//adsp`` board should work out of the box simply following
 the generic Zephyr build instructions in the Getting Started guide.
 
 The MT8186 toolchain is not, and given the proliferation of Xtensa
