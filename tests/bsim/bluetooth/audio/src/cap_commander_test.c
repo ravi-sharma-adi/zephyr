@@ -41,6 +41,8 @@
 
 extern enum bst_result_t bst_result;
 
+#define BROADCASTCODE "BroadcastCode"
+
 static struct bt_conn *connected_conns[CONFIG_BT_MAX_CONN];
 static volatile size_t connected_conn_cnt;
 
@@ -51,6 +53,7 @@ static uint32_t broadcaster_broadcast_id;
 
 static uint8_t received_base[UINT8_MAX];
 static uint8_t received_base_size;
+static uint8_t src_id[CONFIG_BT_MAX_CONN];
 
 static struct k_sem sem_disconnected;
 static struct k_sem sem_cas_discovered;
@@ -428,6 +431,7 @@ bap_broadcast_assistant_recv_state_cb(struct bt_conn *conn, int err,
 {
 	char le_addr[BT_ADDR_LE_STR_LEN];
 	char bad_code[BT_ISO_BROADCAST_CODE_SIZE * 2 + 1];
+	size_t acceptor_count = get_dev_cnt() - 2;
 
 	if (err != 0) {
 		FAIL("BASS recv state read failed (%d)\n", err);
@@ -449,6 +453,12 @@ bap_broadcast_assistant_recv_state_cb(struct bt_conn *conn, int err,
 	if (state->encrypt_state == BT_BAP_BIG_ENC_STATE_BAD_CODE) {
 		FAIL("Encryption state is BT_BAP_BIG_ENC_STATE_BAD_CODE");
 		return;
+	}
+
+	for (size_t index = 0; index < acceptor_count; index++) {
+		if (conn == connected_conns[index]) {
+			src_id[index] = state->src_id;
+		}
 	}
 
 	for (uint8_t i = 0; i < state->num_subgroups; i++) {
@@ -991,6 +1001,25 @@ static void test_broadcast_reception_stop(size_t acceptor_count)
 	}
 }
 
+static void test_distribute_broadcast_code(size_t acceptor_count)
+{
+	struct bt_cap_commander_distribute_broadcast_code_param distribute_broadcast_code_param;
+	struct bt_cap_commander_distribute_broadcast_code_member_param param[CONFIG_BT_MAX_CONN] = {
+		0};
+
+	distribute_broadcast_code_param.type = BT_CAP_SET_TYPE_AD_HOC;
+	distribute_broadcast_code_param.param = param;
+	distribute_broadcast_code_param.count = acceptor_count;
+	memcpy(distribute_broadcast_code_param.broadcast_code, BROADCASTCODE,
+	       sizeof(BROADCASTCODE));
+	for (size_t i = 0; i < acceptor_count; i++) {
+
+		distribute_broadcast_code_param.param[i].member.member = connected_conns[i];
+		distribute_broadcast_code_param.param[i].src_id = src_id[i];
+	}
+	bt_cap_commander_distribute_broadcast_code(&distribute_broadcast_code_param);
+}
+
 static void test_main_cap_commander_capture_and_render(void)
 {
 	const size_t acceptor_cnt = get_dev_cnt() - 1; /* Assume all other devices are acceptors
@@ -1067,6 +1096,8 @@ static void test_main_cap_commander_broadcast_reception(void)
 	pa_sync_to_broadcaster();
 
 	test_broadcast_reception_start(acceptor_count);
+
+	test_distribute_broadcast_code(acceptor_count);
 
 	backchannel_sync_wait_any(); /* wait for the acceptor to receive data */
 
