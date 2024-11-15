@@ -11,11 +11,15 @@ description: |
 
         Used to output a clock signal from the MCU to a GPIO pin.
         The selected signal goes through a configurable prescaler before output.
+        The clocks property defines the MCOx source clock. Several are possible
+        for MCO1 and/or MCO2 depending on the stm32 serie.
+        The prescaler is directly the value from 1 to n depending on the stm32 serie
+        and will be converted in LL_RCC_MCO2_DIV_n
 
         Example:
                 &mco1 {
                         clocks = <&rcc STM32_SRC_LSE MCO1_SEL(7)>;
-                        prescaler = <MCO1_PRE(1)>;
+                        prescaler = <5>;
                         pinctrl-0 = <&rcc_mco_pa8>;
                         pinctrl-names = "default";
                         status = "okay";
