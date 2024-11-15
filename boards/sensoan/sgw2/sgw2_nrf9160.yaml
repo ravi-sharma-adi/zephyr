@@ -1,0 +1,15 @@
+identifier: sgw2/nrf9160
+name: SGW2-NRF9160
+type: mcu
+arch: arm
+toolchain:
+  - gnuarmemb
+  - zephyr
+ram: 64
+flash: 256
+supported:
+  - gpio
+  - i2c
+  - pwm
+  - spi
+vendor: sensoan
