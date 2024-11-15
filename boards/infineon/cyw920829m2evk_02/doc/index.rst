@@ -136,6 +136,27 @@ The path to the installed Infineon OpenOCD executable must be available to the `
 
 Once the gdb console starts after executing the west debug command, you may now set breakpoints and perform other standard GDB debugging on the CYW20829 CM33 core.
 
+Operate in Secure LCS
+*************************
+
+The device lifecycle is a key aspect of the security of the AIROC™ CYW20829 Bluetooth® MCU. The lifecycle stages follow a strict, irreversible progression dictated by the programming of the eFuse bits (changing the value from "0" to "1"). This system is used to protect the device's internal data and code at the level required by the customer.
+SECURE is the lifecycle state of a secured device. Follow the instructions in `AN239590 Provision CYW20829 to SECURE LCS`_ to transition to SECURE LCS. In the SECURE LCS state, the protection state is set to secure. A secured device will only boot if the authentication of its flash boot and application code is successful.
+
+To build the Secure LCS project in Zephyr the for following Kconfig should be added:
+CONFIG_INFINEON_SECURE_LCS=y
+CONFIG_INFINEON_SECURE_POLICY=path to policy JSON file, which was created for provision device to Secure LCS (refer to section 3.2 "Key creation" of `AN239590 Provision CYW20829 to SECURE LCS`_)
+CONFIG_INFINEON_SMIF_ENCRYPTION=y, should be used if device was provisioned with enabled SMIF encryption feature.
+
+Here is an example for building the :zephyr:code-sample:`blinky` sample application for Secure LCS.
+
+.. code-block:: shell
+
+    west build -b cyw920829m2evk_02 -p always samples/basic/blinky -DCONFIG_INFINEON_SECURE_LCS=y -DCONFIG_INFINEON_SECURE_POLICY=\"policy/policy_secure.json\"
+
+
+.. _AN239590 Provision CYW20829 to SECURE LCS:
+    https://www.infineon.com/dgdl/Infineon-AN239590_Provision_CYW20829_CYW89829_to_Secure_LCS-ApplicationNotes-v02_00-EN.pdf?fileId=8ac78c8c8d2fe47b018e3677dd517258
+
 .. _CYW20829 SoC Website:
     https://www.infineon.com/cms/en/product/wireless-connectivity/airoc-bluetooth-le-bluetooth-multiprotocol/airoc-bluetooth-le/cyw20829/
 
