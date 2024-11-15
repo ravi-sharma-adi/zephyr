@@ -26,6 +26,7 @@
 #define STM32_SRC_HSI           (STM32_SRC_LSI + 1)
 #define STM32_SRC_HSE           (STM32_SRC_HSI + 1)
 #define STM32_SRC_PLLCLK        (STM32_SRC_HSE + 1)
+#define STM32_SRC_EXT_HSE       (STM32_SRC_PLLCLK + 1)
 
 #define STM32_CLOCK_REG_MASK    0xFFU
 #define STM32_CLOCK_REG_SHIFT   0U
