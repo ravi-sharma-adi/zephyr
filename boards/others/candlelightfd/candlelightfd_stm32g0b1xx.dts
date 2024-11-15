@@ -1,0 +1,16 @@
+/*
+ * Copyright (c) 2024 Sean Nyekjaer <sean@geanix.com>
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <st/g0/stm32g0b1Xb.dtsi>
+#include <st/g0/stm32g0b1r(b-c-e)tx-pinctrl.dtsi>
+#include "candlelightfd.dtsi"
+
+/ {
+	model = "candleLight FD";
+	compatible = "candlelightfd";
+};
