@@ -40,6 +40,7 @@ config ADC_MCUX_LPADC
 config ADC_MCUX_ETC
 	bool "MCUX ADC ETC driver"
 	depends on HAS_MCUX_ADC_ETC
+	depends on ADC_MCUX_LPADC
 	help
 	  Enable the MCUX ADC ETC driver.
 
