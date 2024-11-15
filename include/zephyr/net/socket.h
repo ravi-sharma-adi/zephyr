@@ -1190,6 +1190,8 @@ struct in_pktinfo {
 	struct in_addr ipi_addr;     /**< Header Destination address */
 };
 
+/** Set IPv4 multicast datagram network interface. */
+#define IP_MULTICAST_IF 32
 /** Set IPv4 multicast TTL value. */
 #define IP_MULTICAST_TTL 33
 /** Join IPv4 multicast group. */
@@ -1204,6 +1206,14 @@ struct ip_mreqn {
 	struct in_addr imr_multiaddr; /**< IP multicast group address */
 	struct in_addr imr_address;   /**< IP address of local interface */
 	int            imr_ifindex;   /**< Network interface index */
+};
+
+/**
+ * @brief Struct used when setting a IPv4 multicast network interface.
+ */
+struct ip_mreq  {
+	struct in_addr imr_multiaddr;   /**< IP multicast group address */
+	struct in_addr imr_interface;   /**< IP address of local interface */
 };
 
 /** @} */
