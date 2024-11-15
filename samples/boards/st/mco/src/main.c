@@ -17,6 +17,7 @@ int main(void)
 	 * initialization. This sample checks that all MCOs are ready - if so,
 	 * the selected clock should be visible on the chosen GPIO pin.
 	 */
+#if DT_NODE_HAS_STATUS_OKAY(DT_NODELABEL(mco1))
 	dev = DEVICE_DT_GET(DT_NODELABEL(mco1));
 	if (device_is_ready(dev)) {
 		printk("MCO1 device successfully configured\n");
@@ -24,6 +25,7 @@ int main(void)
 		printk("MCO1 device not ready\n");
 		return -1;
 	}
+#endif /* mco1 */
 
 #if DT_NODE_HAS_STATUS_OKAY(DT_NODELABEL(mco2))
 	dev = DEVICE_DT_GET(DT_NODELABEL(mco2));
@@ -33,7 +35,7 @@ int main(void)
 		printk("MCO2 device not ready\n");
 		return -1;
 	}
-#endif
+#endif /* mco2 */
 
 	printk("\nDisplayed the status of all MCO devices - end of example.\n");
 	return 0;

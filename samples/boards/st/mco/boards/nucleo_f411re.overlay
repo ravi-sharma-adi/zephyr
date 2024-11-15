@@ -1,0 +1,18 @@
+/* Enable the PLLI2s and set it as clock source for the MCO2 (with prescaler 5) */
+
+&plli2s {
+	div-m = <8>;
+	mul-n = <100>;
+	div-r = <2>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+/* see RefMan RM0383 */
+&mco2 {
+	clocks = <&rcc STM32_SRC_PLLI2S_R MCO2_SEL(1)>;
+	prescaler = <5>; /* set 0b111 in the MCO2PRE of the RCC CFGR */
+	pinctrl-0 = <&rcc_mco_2_pc9>;
+	pinctrl-names = "default";
+	status = "okay";
+};
