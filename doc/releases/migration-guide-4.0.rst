@@ -76,6 +76,12 @@ Mbed TLS
   corresponding build symbol was removed in Mbed TLS 3.1.0 and is now assumed to
   be enabled. (:github:`77657`)
 
+* If a platform has a CSPRNG source available (i.e. :kconfig:option:`CONFIG_CSPRNG_ENABLED`
+  is set), then the Kconfig option :kconfig:option:`CONFIG_MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG`
+  is the default choice for random number source instead of
+  :kconfig:option:`CONFIG_MBEDTLS_PSA_CRYPTO_LEGACY_RNG`. This helps in reducing
+  ROM/RAM footprint of the Mbed TLS library.
+
 TinyCrypt
 =========
 
@@ -217,6 +223,15 @@ Disk
 
 Enhanced Serial Peripheral Interface (eSPI)
 ===========================================
+
+Entropy
+=======
+
+* BT HCI based entropy driver now directly sends the HCI command to parse random
+  data instead of waiting for BT connection to be ready. This is helpful on
+  platforms where the BT controller owns the HW random generator and the application
+  processor needs to get random data before BT is fully enabled.
+  (:github:`79931`)
 
 GNSS
 ====
