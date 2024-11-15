@@ -11,12 +11,12 @@ import mock
 import os
 import pathlib
 import pytest
-import queue
 import re
 import subprocess
 import sys
 import yaml
 
+from collections import deque
 from contextlib import nullcontext
 from elftools.elf.sections import SymbolTableSection
 from typing import List
@@ -868,7 +868,7 @@ def test_projectbuilder_log_info_file(
 
 
 TESTDATA_6 = [
-    (
+    (  # filter, failed
         {'op': 'filter'},
         TwisterStatus.FAIL,
         'Failed',
@@ -890,7 +890,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # filter, cmake res
         {'op': 'filter'},
         TwisterStatus.PASS,
         mock.ANY,
@@ -912,7 +912,7 @@ TESTDATA_6 = [
         1,
         (TwisterStatus.FILTER,)
     ),
-    (
+    (  # filter, no cmake res
         {'op': 'filter'},
         TwisterStatus.PASS,
         mock.ANY,
@@ -934,7 +934,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # cmake, failed
         {'op': 'cmake'},
         TwisterStatus.ERROR,
         'dummy error',
@@ -956,7 +956,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # cmake, cmake_only, no status
         {'op': 'cmake'},
         TwisterStatus.NONE,
         mock.ANY,
@@ -978,7 +978,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # cmake, cmake_only
         {'op': 'cmake'},
         'success',
         mock.ANY,
@@ -1000,7 +1000,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # cmake, no cmake_only, cmake res
         {'op': 'cmake'},
         'success',
         mock.ANY,
@@ -1022,7 +1022,7 @@ TESTDATA_6 = [
         1,
         (TwisterStatus.FILTER,) # this is a tuple
     ),
-    (
+    (  # cmake, no cmake_only, no cmake res
         {'op': 'cmake'},
         'success',
         mock.ANY,
@@ -1044,7 +1044,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # build, no build res
         {'op': 'build'},
         mock.ANY,
         None,
@@ -1066,7 +1066,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # build, skipped
         {'op': 'build'},
         TwisterStatus.SKIP,
         mock.ANY,
@@ -1089,7 +1089,7 @@ TESTDATA_6 = [
         0,
         (TwisterStatus.SKIP, mock.ANY)
     ),
-    (
+    (  # build, blocked
         {'op': 'build'},
         TwisterStatus.PASS,
         mock.ANY,
@@ -1111,7 +1111,7 @@ TESTDATA_6 = [
         0,
         (TwisterStatus.BLOCK, mock.ANY)
     ),
-    (
+    (  # build, determine testcases
         {'op': 'build'},
         'success',
         mock.ANY,
@@ -1134,7 +1134,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # build, determine testcases Error
         {'op': 'build'},
         'success',
         mock.ANY,
@@ -1157,7 +1157,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # gather metrics, run and ready handler
         {'op': 'gather_metrics'},
         mock.ANY,
         mock.ANY,
@@ -1178,8 +1178,8 @@ TESTDATA_6 = [
         mock.ANY,
         0,
         None
-    ),  # 'gather metrics, run and ready handler'
-    (
+    ),
+    (  # gather metrics
         {'op': 'gather_metrics'},
         mock.ANY,
         mock.ANY,
@@ -1200,8 +1200,8 @@ TESTDATA_6 = [
         mock.ANY,
         0,
         None
-    ),  # 'gather metrics'
-    (
+    ),
+    (  # build ok, gather metrics fail
         {'op': 'gather_metrics'},
         mock.ANY,
         mock.ANY,
@@ -1222,8 +1222,8 @@ TESTDATA_6 = [
         'Build Failure at gather_metrics.',
         0,
         None
-    ),  # 'build ok, gather metrics fail',
-    (
+    ),
+    (  # run
         {'op': 'run'},
         'success',
         'OK',
@@ -1246,7 +1246,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # run, Pipeline Runtime Error
         {'op': 'run'},
         TwisterStatus.FAIL,
         mock.ANY,
@@ -1270,7 +1270,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # report, prep artifacts for testing
         {'op': 'report'},
         mock.ANY,
         mock.ANY,
@@ -1292,7 +1292,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # report, runtime artifact cleanup pass, status passed
         {'op': 'report'},
         TwisterStatus.PASS,
         mock.ANY,
@@ -1314,7 +1314,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    ( # report, runtime artifact cleanup all
         {'op': 'report'},
         mock.ANY,
         mock.ANY,
@@ -1336,7 +1336,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # report, no message put
         {'op': 'report'},
         mock.ANY,
         mock.ANY,
@@ -1358,7 +1358,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # cleanup, device
         {'op': 'cleanup', 'mode': 'device'},
         mock.ANY,
         mock.ANY,
@@ -1380,7 +1380,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # cleanup, mode passed
         {'op': 'cleanup', 'mode': 'passed'},
         mock.ANY,
         mock.ANY,
@@ -1402,7 +1402,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # cleanup, mode all
         {'op': 'cleanup', 'mode': 'all'},
         mock.ANY,
         'Valgrind error',
@@ -1424,7 +1424,7 @@ TESTDATA_6 = [
         0,
         None
     ),
-    (
+    (  # cleanup, mode all, cmake build failure
         {'op': 'cleanup', 'mode': 'all'},
         mock.ANY,
         'CMake build failure',
@@ -1498,7 +1498,7 @@ def test_projectbuilder_process(
     expected_skipped,
     expected_missing
 ):
-    def mock_pipeline_put(msg):
+    def mock_pipeline_append(msg):
         if isinstance(pipeline_runtime_error, type) and \
            issubclass(pipeline_runtime_error, Exception):
             raise RuntimeError('Pipeline Error!')
@@ -1535,7 +1535,7 @@ def test_projectbuilder_process(
     pb.run = mock.Mock()
     pb.gather_metrics = mock.Mock(return_value=metrics_res)
 
-    pipeline_mock = mock.Mock(put=mock.Mock(side_effect=mock_pipeline_put))
+    pipeline_mock = mock.Mock(append=mock.Mock(side_effect=mock_pipeline_append))
     done_mock = mock.Mock()
     lock_mock = mock.Mock(
         __enter__=mock.Mock(return_value=(mock.Mock(), mock.Mock())),
@@ -1549,7 +1549,7 @@ def test_projectbuilder_process(
     assert all([log in caplog.text for log in expected_logs])
 
     if resulting_message:
-        pipeline_mock.put.assert_called_with(resulting_message)
+        pipeline_mock.append.assert_called_with(resulting_message)
 
     assert pb.instance.status == expected_status
     assert pb.instance.reason == expected_reason
@@ -2464,18 +2464,17 @@ def test_twisterrunner_run(
     jobclient_mock = mock.Mock()
     jobclient_mock().name='JobClient'
 
-    pipeline_q = queue.LifoQueue()
-    done_q = queue.LifoQueue()
+    pipeline_q = deque()
+    done_q = dict()
     done_instance = mock.Mock(
         metrics={'k2': 'v2'},
         execution_time=30
     )
     done_instance.name='dummy instance'
-    done_q.put(done_instance)
+    done_q[done_instance.name] = done_instance
     manager_mock = mock.Mock()
-    manager_mock().LifoQueue = mock.Mock(
-        side_effect=iter([pipeline_q, done_q])
-    )
+    manager_mock().deque = mock.Mock(return_value=pipeline_q)
+    manager_mock().get_dict = mock.Mock(return_value=done_q)
 
     results_mock = mock.Mock()
     results_mock().error = 1
@@ -2659,11 +2658,11 @@ def test_twisterrunner_add_tasks_to_queue(
         return [filter]
 
     instances = {
-        'dummy1': mock.Mock(run=True, retries=0, status=TwisterStatus.PASS, build_dir="/tmp"),
-        'dummy2': mock.Mock(run=True, retries=0, status=TwisterStatus.SKIP, build_dir="/tmp"),
-        'dummy3': mock.Mock(run=True, retries=0, status=TwisterStatus.FILTER, build_dir="/tmp"),
-        'dummy4': mock.Mock(run=True, retries=0, status=TwisterStatus.ERROR, build_dir="/tmp"),
-        'dummy5': mock.Mock(run=True, retries=0, status=TwisterStatus.FAIL, build_dir="/tmp")
+        'dummy1': mock.Mock(run=True, retries=0, status=TwisterStatus.PASS, build_dir="/tmp", no_own_image=False),
+        'dummy2': mock.Mock(run=True, retries=0, status=TwisterStatus.SKIP, build_dir="/tmp", no_own_image=False),
+        'dummy3': mock.Mock(run=True, retries=0, status=TwisterStatus.FILTER, build_dir="/tmp", no_own_image=False),
+        'dummy4': mock.Mock(run=True, retries=0, status=TwisterStatus.ERROR, build_dir="/tmp", no_own_image=False),
+        'dummy5': mock.Mock(run=True, retries=0, status=TwisterStatus.FAIL, build_dir="/tmp", no_own_image=False)
     }
     instances['dummy4'].testsuite.filter = 'some'
     instances['dummy5'].testsuite.filter = 'full'
@@ -2693,10 +2692,10 @@ def test_twisterrunner_add_tasks_to_queue(
     if retry_build_errors:
         tr.get_cmake_filter_stages.assert_any_call('some', mock.ANY)
 
-    print(pipeline_mock.put.call_args_list)
+    print(pipeline_mock.append.call_args_list)
     print([mock.call(el) for el in expected_pipeline_elements])
 
-    assert pipeline_mock.put.call_args_list == \
+    assert pipeline_mock.append.call_args_list == \
            [mock.call(el) for el in expected_pipeline_elements]
 
 
@@ -2715,8 +2714,8 @@ def test_twisterrunner_pipeline_mgr(mocked_jobserver, platform):
         nonlocal counter
         counter += 1
         if counter > 5:
-            raise queue.Empty()
-        return {'test': 'dummy'}
+            raise IndexError
+        return {'test': mock.Mock(required_images=False)}
 
     instances = {}
     suites = []
@@ -2730,7 +2729,7 @@ def test_twisterrunner_pipeline_mgr(mocked_jobserver, platform):
     )
 
     pipeline_mock = mock.Mock()
-    pipeline_mock.get_nowait = mock.Mock(side_effect=mock_get_nowait)
+    pipeline_mock.pop = mock.Mock(side_effect=mock_get_nowait)
     done_queue_mock = mock.Mock()
     lock_mock = mock.Mock()
     results_mock = mock.Mock()
