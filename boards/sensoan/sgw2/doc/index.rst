@@ -13,21 +13,21 @@ which is compatible with e.g. the TE Connectivity 2041119-2 board edge
 connector.
 
 
-.. figure:: img/sgw2.png
+.. figure:: img/sgw2.jpg
    :width: 500px
    :align: center
    :alt: SGW-2
 
    SGW-2 (Credit: Sensoan Oy)
 
-.. figure:: img/sgw2_pinouts.png
+.. figure:: img/sgw2_pinouts.jpg
    :width: 500px
    :align: center
    :alt: SGW-2 pinout
 
    SGW-2 pinout (Credit: Sensoan Oy)
 
-.. figure:: img/edge_connector.png
+.. figure:: img/edge_connector.jpg
    :align: center
    :alt: TE Connectivity 2041119-2
 
@@ -261,7 +261,7 @@ the lack of an info text indicates an IO that can be freely configured.
 Pins 7-9 correspond to onboard RGB leds and pin 11 correponds to an onboard
 button (a copper colored circle in the middle near the side containing the
 edge connector), and the external pins can be used e.g. for connecting
-external LEDs and buttons having the same roles as the onboard ones. 
+external LEDs and buttons having the same roles as the onboard ones.
 
 +------------+---------------+------------------------------------------------+-------------+-------------+
 | Edge pin   | Name          | Info                                           | nrf9160 pin | nrf5340 pin |
@@ -388,4 +388,4 @@ pins of each SoC (see the table above).
 Logs are by default transmitted via UART whose TX and RX are connected
 respectively to edge connector pins 22 and 23 in the case of nrf9160,
 to pins 24 and 25 in the case of nrf5340/cpuapp and to pins 26 and 29
-in the case of nrf5340/cpunet.  
+in the case of nrf5340/cpunet.
