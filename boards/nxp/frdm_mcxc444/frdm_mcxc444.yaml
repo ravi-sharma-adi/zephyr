@@ -16,6 +16,7 @@ toolchain:
   - xtools
 supported:
   - gpio
+  - pwm
 testing:
   ignore_tags:
     - net
