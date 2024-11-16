@@ -80,8 +80,7 @@ ZTEST(clock, test_clock_gettime)
 	}
 
 	/* verify that we can call clock_gettime() on supported clocks */
-	ARRAY_FOR_EACH(clocks, i)
-	{
+	ARRAY_FOR_EACH(clocks, i) {
 		ts = (struct timespec){-1, -1};
 		zassert_ok(clock_gettime(clocks[i], &ts));
 		zassert_not_equal(ts.tv_sec, -1);
@@ -143,8 +142,7 @@ ZTEST(clock, test_clock_settime)
 	zassert_equal(clock_settime(CLOCK_REALTIME, &ts), -1);
 	zassert_equal(errno, EINVAL);
 
-	ARRAY_FOR_EACH(clocks, i)
-	{
+	ARRAY_FOR_EACH(clocks, i) {
 		if (!settable[i]) {
 			/* should fail attempting to set unsettable clocks */
 			errno = 0;
