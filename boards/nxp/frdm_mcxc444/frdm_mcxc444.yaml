@@ -16,6 +16,8 @@ toolchain:
   - xtools
 supported:
   - gpio
+  - usb_device
+  - usbd
 testing:
   ignore_tags:
     - net
