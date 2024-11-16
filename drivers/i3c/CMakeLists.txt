@@ -9,6 +9,7 @@ zephyr_library()
 zephyr_library_sources(
   i3c_ccc.c
   i3c_common.c
+  i3c_mem_slab.c
 )
 
 zephyr_library_sources_ifdef(
