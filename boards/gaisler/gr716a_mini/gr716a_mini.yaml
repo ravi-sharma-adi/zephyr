@@ -6,7 +6,6 @@ simulation_exec: tsim-leon3
 arch: sparc
 toolchain:
   - zephyr
-  - xtools
 supported:
   - netif
   - spi

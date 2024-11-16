@@ -12,7 +12,6 @@ simulation_exec: FVP_Corstone_SSE-300_Ethos-U55
 toolchain:
   - gnuarmemb
   - zephyr
-  - xtools
 supported:
   - gpio
 testing:

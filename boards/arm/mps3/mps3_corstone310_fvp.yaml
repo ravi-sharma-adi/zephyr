@@ -12,7 +12,6 @@ simulation_exec: FVP_Corstone_SSE-310
 toolchain:
   - gnuarmemb
   - zephyr
-  - xtools
 supported:
   - gpio
 testing:
