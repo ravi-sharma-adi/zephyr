@@ -131,6 +131,10 @@
 	status = "okay";
 };
 
+&i3c1 {
+	status = "okay";
+};
+
 &flexio0 {
 	status = "okay";
 };
