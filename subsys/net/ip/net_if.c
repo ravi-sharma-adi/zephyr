@@ -3508,22 +3508,17 @@ out:
 struct net_if *net_if_ipv4_select_src_iface(const struct in_addr *dst)
 {
 	struct net_if *selected = NULL;
+	const struct in_addr *src;
 
-	STRUCT_SECTION_FOREACH(net_if, iface) {
-		bool ret;
-
-		ret = net_if_ipv4_addr_mask_cmp(iface, dst);
-		if (ret) {
-			selected = iface;
-			goto out;
-		}
+	src = net_if_ipv4_select_src_addr(NULL, dst);
+	if (src != net_ipv4_unspecified_address()) {
+		net_if_ipv4_addr_lookup(src, &selected);
 	}
 
 	if (selected == NULL) {
 		selected = net_if_get_default();
 	}
 
-out:
 	return selected;
 }
 
@@ -3701,6 +3696,40 @@ const struct in_addr *net_if_ipv4_select_src_addr(struct net_if *dst_iface,
 
 out:
 	return src;
+}
+
+/* Internal function to get the first IPv4 address of the interface */
+struct net_if_addr *net_if_ipv4_addr_get_first_by_index(int ifindex)
+{
+	struct net_if *iface = net_if_get_by_index(ifindex);
+	struct net_if_addr *ifaddr = NULL;
+	struct net_if_ipv4 *ipv4;
+
+	if (!iface) {
+		return NULL;
+	}
+
+	net_if_lock(iface);
+
+	ipv4 = iface->config.ip.ipv4;
+	if (!ipv4) {
+		goto out;
+	}
+
+	ARRAY_FOR_EACH(ipv4->unicast, i) {
+		if (!ipv4->unicast[i].ipv4.is_used ||
+		    ipv4->unicast[i].ipv4.address.family != AF_INET) {
+			continue;
+		}
+
+		ifaddr = &ipv4->unicast[i].ipv4;
+		break;
+	}
+
+out:
+	net_if_unlock(iface);
+
+	return ifaddr;
 }
 
 struct net_if_addr *net_if_ipv4_addr_lookup(const struct in_addr *addr,

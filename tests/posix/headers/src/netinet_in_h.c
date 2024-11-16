@@ -66,7 +66,7 @@ ZTEST(posix_headers, test_netinet_in_h)
 	/* zassert_not_equal(-1, IPV6_JOIN_GROUP); */ /* not implemented */
 	/* zassert_not_equal(-1, IPV6_LEAVE_GROUP); */ /* not implemented */
 	/* zassert_not_equal(-1, IPV6_MULTICAST_HOPS); */ /* not implemented */
-	/* zassert_not_equal(-1, IPV6_MULTICAST_IF); */ /* not implemented */
+	zexpect_not_equal(-1, IPV6_MULTICAST_IF);
 	/* zassert_not_equal(-1, IPV6_MULTICAST_LOOP); */ /* not implemented */
 	/* zassert_not_equal(-1, IPV6_UNICAST_HOPS); */ /* not implemented */
 	zassert_not_equal(-1, IPV6_V6ONLY);
