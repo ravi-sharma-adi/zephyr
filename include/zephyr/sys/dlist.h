@@ -492,6 +492,15 @@ static inline void sys_dlist_insert_at(sys_dlist_t *list, sys_dnode_t *node,
 	}
 }
 
+static inline void sys_dlist_dequeue(sys_dnode_t *node)
+{
+	sys_dnode_t *const prev = node->prev;
+	sys_dnode_t *const next = node->next;
+
+	prev->next = next;
+	next->prev = prev;
+}
+
 /**
  * @brief remove a specific node from a list
  *
