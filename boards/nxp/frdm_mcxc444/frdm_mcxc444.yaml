@@ -16,6 +16,7 @@ toolchain:
   - xtools
 supported:
   - gpio
+  - adc
 testing:
   ignore_tags:
     - net
