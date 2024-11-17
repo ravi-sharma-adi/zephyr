@@ -85,6 +85,8 @@ static void test_capture(uint32_t period, uint32_t pulse, enum test_pwm_unit uni
 		ztest_test_fail();
 	}
 
+	pwm_disable_capture(in.dev, in.pwm);
+
 	if (err == -ENOTSUP) {
 		TC_PRINT("capture type not supported\n");
 		ztest_test_skip();
@@ -98,9 +100,15 @@ static void test_capture(uint32_t period, uint32_t pulse, enum test_pwm_unit uni
 	}
 
 	if (flags & PWM_CAPTURE_TYPE_PULSE) {
-		zassert_within(pulse_capture, pulse, pulse / 100,
-			       "pulse capture off by more than 1%");
+		if (flags & PWM_POLARITY_INVERTED) {
+			zassert_within(pulse_capture, period - pulse, (period - pulse) / 100,
+					"pulse capture off by more than 1%");
+		} else {
+			zassert_within(pulse_capture, pulse, pulse / 100,
+					"pulse capture off by more than 1%");
+		}
 	}
+
 }
 
 ZTEST_USER(pwm_loopback, test_pulse_capture)
