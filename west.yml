@@ -23,6 +23,8 @@ manifest:
       url-base: https://github.com/zephyrproject-rtos
     - name: babblesim
       url-base: https://github.com/BabbleSim
+    - name: nrfconnect
+      url-base: https://github.com/nrfconnect
 
   group-filter: [-babblesim, -optional]
 
@@ -188,7 +190,7 @@ manifest:
       groups:
         - hal
     - name: hal_nordic
-      revision: 5c8d109371ebb740fbef1f440a3b59e488a36717
+      revision: pull/252/head
       path: modules/hal/nordic
       groups:
         - hal
@@ -302,6 +304,10 @@ manifest:
     - name: nrf_hw_models
       revision: aeef3db9fa9e4b9d12b3bbec44f9cedc8fcb7d9c
       path: modules/bsim_hw_models/nrf_hw_models
+    - name: nrf_wifi
+      revision: 1c85b3c927897c752c155560e263d4947ddcc6e4
+      path: modules/lib/nrf_wifi
+      remote: nrfconnect
     - name: open-amp
       revision: b735edbc739ad59156eb55bb8ce2583d74537719
       path: modules/lib/open-amp
