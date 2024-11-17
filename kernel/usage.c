@@ -272,6 +272,27 @@ int k_thread_runtime_stats_disable(k_tid_t  thread)
 
 	return 0;
 }
+
+bool k_thread_runtime_stats_is_enabled(k_tid_t thread)
+{
+	bool status;
+	k_spinlock_key_t key;
+
+	/*
+	 * To avoid ambiguity when return false, errno is
+	 * set to EINVAL when return false.
+	 */
+	CHECKIF(thread == NULL) {
+		errno = EINVAL;
+		return false;
+	}
+
+	key = k_spin_lock(&usage_lock);
+	status = thread->base.usage.track_usage;
+	k_spin_unlock(&usage_lock, key);
+
+	return status;
+}
 #endif /* CONFIG_SCHED_THREAD_USAGE_ANALYSIS */
 
 #ifdef CONFIG_SCHED_THREAD_USAGE_ALL
