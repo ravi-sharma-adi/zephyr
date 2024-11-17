@@ -7,7 +7,7 @@
 /dts-v1/;
 
 #include <ambiq/ambiq_apollo3_blue.dtsi>
-#include <../boards/ambiq/apollo3_evb/apollo3_evb-pinctrl.dtsi>
+#include "artemis_nano.dtsi"
 
 / {
 	model = "Sparkfun Artemis Nano";
