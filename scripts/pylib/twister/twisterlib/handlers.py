@@ -474,15 +474,19 @@ class DeviceHandler(Handler):
 
         # Select an available DUT with less failures
         for d in sorted(duts_found, key=lambda _dut: _dut.failures):
-            d.lock.acquire()
+            duts_shared_hw = [_d for _d in self.duts if _d.id == d.id]  # get all DUTs with the same id
+            for _d in duts_shared_hw:
+                _d.lock.acquire()
             avail = False
             if d.available:
-                d.available = 0
+                for _d in duts_shared_hw:
+                    _d.available = 0
                 d.counter_increment()
                 avail = True
                 logger.debug(f"Retain DUT:{d.platform}, Id:{d.id}, "
                              f"counter:{d.counter}, failures:{d.failures}")
-            d.lock.release()
+            for _d in duts_shared_hw:
+                _d.lock.release()
             if avail:
                 return d
 
@@ -493,7 +497,9 @@ class DeviceHandler(Handler):
             dut.failures_increment()
         logger.debug(f"Release DUT:{dut.platform}, Id:{dut.id}, "
                      f"counter:{dut.counter}, failures:{dut.failures}")
-        dut.available = 1
+        for _d in self.duts:
+            if _d.id == dut.id:
+                _d.available = 1
 
     @staticmethod
     def run_custom_script(script, timeout):
