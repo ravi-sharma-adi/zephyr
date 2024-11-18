@@ -17,7 +17,11 @@ zephyr_library_sources(
 # headers for different SoCs.
 set(dt_binding_includes ${DTS_INCLUDE_FILES})
 list(FILTER dt_binding_includes INCLUDE REGEX "/dt-bindings/.*\.h$")
-list(TRANSFORM dt_binding_includes PREPEND "-include;")
+if(CMAKE_C_COMPILER_ID STREQUAL "IAR")
+  list(TRANSFORM dt_binding_includes PREPEND "--preinclude;")
+else()
+  list(TRANSFORM dt_binding_includes PREPEND "-include;")
+endif()
 set_source_files_properties(
   validate_binding_headers.c
   DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
