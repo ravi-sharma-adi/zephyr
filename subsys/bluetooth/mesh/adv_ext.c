@@ -48,10 +48,6 @@ enum {
 	ADV_FLAG_SENT,
 	/** Currently performing proxy advertising */
 	ADV_FLAG_PROXY,
-	/** The proxy has been start, but maybe pending. */
-	ADV_FLAG_PROXY_START,
-	/** The send-call has been pending. */
-	ADV_FLAG_SCHEDULE_PENDING,
 	/** Custom adv params have been set, we need to update the parameters on
 	 *  the next send.
 	 */
@@ -261,20 +257,17 @@ static const char * const adv_tag_to_str[] = {
 static bool schedule_send_with_mask(struct bt_mesh_ext_adv *ext_adv, int ignore_mask)
 {
 	if (atomic_test_and_clear_bit(ext_adv->flags, ADV_FLAG_PROXY)) {
-		atomic_clear_bit(ext_adv->flags, ADV_FLAG_PROXY_START);
 		(void)bt_le_ext_adv_stop(ext_adv->instance);
 
 		atomic_clear_bit(ext_adv->flags, ADV_FLAG_ACTIVE);
 	}
 
 	if (atomic_test_bit(ext_adv->flags, ADV_FLAG_ACTIVE)) {
-		atomic_set_bit(ext_adv->flags, ADV_FLAG_SCHEDULE_PENDING);
 		return false;
 	} else if ((~ignore_mask) & k_work_busy_get(&ext_adv->work)) {
 		return false;
 	}
 
-	atomic_clear_bit(ext_adv->flags, ADV_FLAG_SCHEDULE_PENDING);
 	bt_mesh_wq_submit(&ext_adv->work);
 
 	return true;
@@ -301,7 +294,6 @@ static void send_pending_adv(struct k_work *work)
 
 		atomic_clear_bit(ext_adv->flags, ADV_FLAG_ACTIVE);
 		atomic_clear_bit(ext_adv->flags, ADV_FLAG_PROXY);
-		atomic_clear_bit(ext_adv->flags, ADV_FLAG_PROXY_START);
 
 		if (ext_adv->adv) {
 			struct bt_mesh_adv_ctx ctx = ext_adv->adv->ctx;
@@ -346,13 +338,12 @@ static void send_pending_adv(struct k_work *work)
 		return;
 	}
 
-	atomic_set_bit(ext_adv->flags, ADV_FLAG_PROXY_START);
-
 	if (!bt_mesh_adv_gatt_send()) {
 		atomic_set_bit(ext_adv->flags, ADV_FLAG_PROXY);
 	}
 
-	if (atomic_test_and_clear_bit(ext_adv->flags, ADV_FLAG_SCHEDULE_PENDING)) {
+	/* Maybe have messages coming during starting Proxy Advertising */
+	if (!bt_mesh_adv_is_empty_by_tag(ext_adv->tags)) {
 		schedule_send_with_mask(ext_adv, K_WORK_RUNNING);
 	}
 }
@@ -491,7 +482,7 @@ static void connected(struct bt_le_ext_adv *instance,
 {
 	struct bt_mesh_ext_adv *ext_adv = gatt_adv_get();
 
-	if (atomic_test_and_clear_bit(ext_adv->flags, ADV_FLAG_PROXY_START)) {
+	if (atomic_test_and_clear_bit(ext_adv->flags, ADV_FLAG_PROXY)) {
 		atomic_clear_bit(ext_adv->flags, ADV_FLAG_ACTIVE);
 		(void)schedule_send(ext_adv);
 	}

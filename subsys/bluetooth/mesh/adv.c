@@ -30,6 +30,15 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(bt_mesh_adv);
 
+#if defined(CONFIG_BT_MESH_RELAY) && \
+	(defined(CONFIG_BT_MESH_ADV_LEGACY) || \
+	 defined(CONFIG_BT_MESH_ADV_EXT_RELAY_USING_MAIN_ADV_SET) || \
+	 !(CONFIG_BT_MESH_RELAY_ADV_SETS))
+#define RELAY_QUEUE_INCLUDED 1
+#else
+#define RELAY_QUEUE_INCLUDED 0
+#endif
+
 /* Window and Interval are equal for continuous scanning */
 #define MESH_SCAN_INTERVAL    BT_MESH_ADV_SCAN_UNIT(BT_MESH_SCAN_INTERVAL_MS)
 #define MESH_SCAN_WINDOW      BT_MESH_ADV_SCAN_UNIT(BT_MESH_SCAN_WINDOW_MS)
@@ -202,10 +211,7 @@ struct bt_mesh_adv *bt_mesh_adv_get(k_timeout_t timeout)
 						K_POLL_MODE_NOTIFY_ONLY,
 						&bt_mesh_adv_queue,
 						0),
-#if defined(CONFIG_BT_MESH_RELAY) && \
-	(defined(CONFIG_BT_MESH_ADV_LEGACY) || \
-	 defined(CONFIG_BT_MESH_ADV_EXT_RELAY_USING_MAIN_ADV_SET) || \
-	 !(CONFIG_BT_MESH_RELAY_ADV_SETS))
+#if RELAY_QUEUE_INCLUDED
 		K_POLL_EVENT_STATIC_INITIALIZER(K_POLL_TYPE_FIFO_DATA_AVAILABLE,
 						K_POLL_MODE_NOTIFY_ONLY,
 						&bt_mesh_relay_queue,
@@ -234,6 +240,34 @@ struct bt_mesh_adv *bt_mesh_adv_get_by_tag(enum bt_mesh_adv_tag_bit tags, k_time
 	}
 
 	return bt_mesh_adv_get(timeout);
+}
+
+bool bt_mesh_adv_is_empty_by_tag(enum bt_mesh_adv_tag_bit tags)
+{
+	if (IS_ENABLED(CONFIG_BT_MESH_ADV_EXT_FRIEND_SEPARATE) &&
+	    tags & BT_MESH_ADV_TAG_BIT_FRIEND) {
+		return k_fifo_is_empty(&bt_mesh_friend_queue);
+	}
+
+	if (IS_ENABLED(CONFIG_BT_MESH_RELAY) &&
+	    !(tags & BT_MESH_ADV_TAG_BIT_LOCAL)) {
+		return k_fifo_is_empty(&bt_mesh_relay_queue);
+	}
+
+	if (IS_ENABLED(CONFIG_BT_MESH_ADV_EXT_GATT_SEPARATE) &&
+	    tags & BT_MESH_ADV_TAG_BIT_PROXY) {
+		return true;
+	}
+
+	if (!k_fifo_is_empty(&bt_mesh_adv_queue)) {
+		return false;
+	}
+
+	if (IS_ENABLED(RELAY_QUEUE_INCLUDED)) {
+		return k_fifo_is_empty(&bt_mesh_relay_queue);
+	}
+
+	return true;
 }
 
 void bt_mesh_adv_get_cancel(void)
