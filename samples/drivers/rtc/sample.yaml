@@ -1,0 +1,10 @@
+sample:
+  name: Real-Time Clock Sample
+tests:
+  sample.drivers.rtc:
+    harness: rtc
+    tags:
+      - samples
+      - rtc
+    depends_on:
+      - rtc
