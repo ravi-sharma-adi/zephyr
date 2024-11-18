@@ -3,5 +3,11 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
+if BOARD_WIO_TERMINAL
+
 config LV_COLOR_16_SWAP
 	default y if LVGL
+
+source "${ZEPHYR_BASE}/boards/common/usb/Kconfig.cdc_acm_serial"
+
+endif # BOARD_WIO_TERMINAL

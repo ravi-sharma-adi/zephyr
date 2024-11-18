@@ -9,4 +9,6 @@ if BOARD_ADAFRUIT_FEATHER_NRF52840
 config BT_CTLR
 	default BT
 
+source "${ZEPHYR_BASE}/boards/common/usb/Kconfig.cdc_acm_serial"
+
 endif # BOARD_ADAFRUIT_FEATHER_NRF52840
