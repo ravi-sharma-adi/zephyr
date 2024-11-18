@@ -58,6 +58,22 @@
 
 LOG_MODULE_REGISTER(fpga_ice40);
 
+#if defined(CONFIG_PINCTRL) && defined(CONFIG_ICE40_FGPA_LOAD_MODE_GPIO)
+#define ICE40_PINCTRL_AND_GPIO_LOAD_MODE
+#endif
+
+#ifdef CONFIG_ICE40_FGPA_LOAD_MODE_GPIO
+#define ICE40_FPGA_LOAD_MODE_GPIO_AVAILABLE 1
+#else
+#define ICE40_FPGA_LOAD_MODE_GPIO_AVAILABLE 0
+#endif
+
+#ifdef CONFIG_ICE40_FGPA_LOAD_MODE_SPI
+#define ICE40_FPGA_LOAD_MODE_SPI_AVAILABLE 1
+#else
+#define ICE40_FPGA_LOAD_MODE_SPI_AVAILABLE 0
+#endif
+
 struct fpga_ice40_data {
 	uint32_t crc;
 	/* simply use crc32 as info */
@@ -81,9 +97,9 @@ struct fpga_ice40_config {
 	uint8_t leading_clocks;
 	uint8_t trailing_clocks;
 	fpga_api_load load;
-#ifdef CONFIG_PINCTRL
+#ifdef ICE40_PINCTRL_AND_GPIO_LOAD_MODE
 	const struct pinctrl_dev_config *pincfg;
-#endif
+#endif /* ICE40_PINCTRL_AND_GPIO_LOAD_MODE */
 };
 
 static void fpga_ice40_crc_to_str(uint32_t crc, char *s)
@@ -102,9 +118,10 @@ static void fpga_ice40_crc_to_str(uint32_t crc, char *s)
 	s[sizeof(crc) * NIBBLES_PER_BYTE] = '\0';
 }
 
+#ifdef CONFIG_ICE40_FGPA_LOAD_MODE_GPIO
 /*
  * This is a calibrated delay loop used to achieve a 1 MHz SPI_CLK frequency
- * with the bitbang mode. It is used both in fpga_ice40_send_clocks()
+ * with the GPIO bitbang mode. It is used both in fpga_ice40_send_clocks()
  * and fpga_ice40_spi_send_data().
  *
  * Calibration is achieved via the mhz_delay_count device tree parameter. See
@@ -163,25 +180,6 @@ static void fpga_ice40_spi_send_data(size_t delay, volatile gpio_port_pins_t *se
 	*set |= cs;
 }
 
-static enum FPGA_status fpga_ice40_get_status(const struct device *dev)
-{
-	enum FPGA_status st;
-	k_spinlock_key_t key;
-	struct fpga_ice40_data *data = dev->data;
-
-	key = k_spin_lock(&data->lock);
-
-	if (data->loaded && data->on) {
-		st = FPGA_STATUS_ACTIVE;
-	} else {
-		st = FPGA_STATUS_INACTIVE;
-	}
-
-	k_spin_unlock(&data->lock, key);
-
-	return st;
-}
-
 /*
  * See iCE40 Family Handbook, Appendix A. SPI Slave Configuration Procedure,
  * pp 15-21.
@@ -208,16 +206,6 @@ static int fpga_ice40_load_gpio(const struct device *dev, uint32_t *image_ptr, u
 	if (!device_is_ready(config->pico.port)) {
 		LOG_ERR("%s: GPIO for pico is not ready", dev->name);
 		return -ENODEV;
-	}
-
-	if (config->set == NULL) {
-		LOG_ERR("%s: set register was not specified", dev->name);
-		return -EFAULT;
-	}
-
-	if (config->clear == NULL) {
-		LOG_ERR("%s: clear register was not specified", dev->name);
-		return -EFAULT;
 	}
 
 	/* prepare masks */
@@ -305,7 +293,7 @@ unlock:
 	(void)gpio_pin_configure_dt(&config->bus.config.cs.gpio, GPIO_OUTPUT_HIGH);
 	(void)gpio_pin_configure_dt(&config->clk, GPIO_DISCONNECTED);
 	(void)gpio_pin_configure_dt(&config->pico, GPIO_DISCONNECTED);
-#ifdef CONFIG_PINCTRL
+#ifdef ICE40_PINCTRL_AND_GPIO_LOAD_MODE
 	(void)pinctrl_apply_state(config->pincfg, PINCTRL_STATE_DEFAULT);
 #endif
 
@@ -314,6 +302,9 @@ unlock:
 	return ret;
 }
 
+#endif /* CONFIG_ICE40_FGPA_LOAD_MODE_GPIO */
+
+#ifdef CONFIG_ICE40_FGPA_LOAD_MODE_SPI
 static int fpga_ice40_load_spi(const struct device *dev, uint32_t *image_ptr, uint32_t img_size)
 {
 	int ret;
@@ -448,7 +439,7 @@ static int fpga_ice40_load_spi(const struct device *dev, uint32_t *image_ptr, ui
 unlock:
 	(void)gpio_pin_configure_dt(&config->creset, GPIO_OUTPUT_HIGH);
 	(void)gpio_pin_configure_dt(&config->bus.config.cs.gpio, GPIO_OUTPUT_HIGH);
-#ifdef CONFIG_PINCTRL
+#ifdef ICE40_PINCTRL_AND_GPIO_LOAD_MODE
 	(void)pinctrl_apply_state(config->pincfg, PINCTRL_STATE_DEFAULT);
 #endif
 
@@ -456,10 +447,35 @@ unlock:
 
 	return ret;
 }
+#endif /* CONFIG_ICE40_FGPA_LOAD_MODE_SPI */
+
+static enum FPGA_status fpga_ice40_get_status(const struct device *dev)
+{
+	enum FPGA_status st;
+	k_spinlock_key_t key;
+	struct fpga_ice40_data *data = dev->data;
+
+	key = k_spin_lock(&data->lock);
+
+	if (data->loaded && data->on) {
+		st = FPGA_STATUS_ACTIVE;
+	} else {
+		st = FPGA_STATUS_INACTIVE;
+	}
+
+	k_spin_unlock(&data->lock, key);
+
+	return st;
+}
 
 static int fpga_ice40_load(const struct device *dev, uint32_t *image_ptr, uint32_t img_size)
 {
 	const struct fpga_ice40_config *config = dev->config;
+
+	if (config->load == NULL) {
+		LOG_ERR("%s: load function for this mode is not available", dev->name);
+		return -ENOSYS;
+	}
 
 	return config->load(dev, image_ptr, img_size);
 }
@@ -550,26 +566,35 @@ static int fpga_ice40_init(const struct device *dev)
 
 #define FPGA_ICE40_BUS_FREQ(inst) DT_INST_PROP(inst, spi_max_frequency)
 
-#define FPGA_ICE40_CONFIG_DELAY_US(inst)                                                           \
-	DT_INST_PROP_OR(inst, config_delay_us, FPGA_ICE40_CONFIG_DELAY_US_MIN)
+#define FPGA_ICE40_CONFIG_DELAY_US(inst) DT_INST_PROP(inst, config_delay_us)
 
-#define FPGA_ICE40_CRESET_DELAY_US(inst)                                                           \
-	DT_INST_PROP_OR(inst, creset_delay_us, FPGA_ICE40_CRESET_DELAY_US_MIN)
+#define FPGA_ICE40_CRESET_DELAY_US(inst) DT_INST_PROP(inst, creset_delay_us)
 
-#define FPGA_ICE40_LEADING_CLOCKS(inst)                                                            \
-	DT_INST_PROP_OR(inst, leading_clocks, FPGA_ICE40_LEADING_CLOCKS_MIN)
+#define FPGA_ICE40_LEADING_CLOCKS(inst) DT_INST_PROP(inst, leading_clocks)
 
-#define FPGA_ICE40_TRAILING_CLOCKS(inst)                                                           \
-	DT_INST_PROP_OR(inst, trailing_clocks, FPGA_ICE40_TRAILING_CLOCKS_MIN)
+#define FPGA_ICE40_TRAILING_CLOCKS(inst) DT_INST_PROP(inst, trailing_clocks)
 
 #define FPGA_ICE40_MHZ_DELAY_COUNT(inst) DT_INST_PROP_OR(inst, mhz_delay_count, 0)
 
 #define FPGA_ICE40_GPIO_PINS(inst, name) (volatile gpio_port_pins_t *)DT_INST_PROP_OR(inst, name, 0)
 
-#define FPGA_ICE40_LOAD_FUNC(inst)                                                                 \
-	(DT_INST_PROP(inst, load_mode_bitbang) ? fpga_ice40_load_gpio : fpga_ice40_load_spi)
+#ifdef CONFIG_ICE40_FGPA_LOAD_MODE_SPI
+#define FPGA_ICE40_LOAD_FUNC_SPI fpga_ice40_load_spi
+#else
+#define FPGA_ICE40_LOAD_FUNC_SPI NULL
+#endif /* CONFIG_ICE40_FGPA_LOAD_MODE_SPI */
 
-#ifdef CONFIG_PINCTRL
+#ifdef CONFIG_ICE40_FGPA_LOAD_MODE_GPIO
+#define FPGA_ICE40_LOAD_FUNC_GPIO fpga_ice40_load_gpio
+#else
+#define FPGA_ICE40_LOAD_FUNC_GPIO NULL
+#endif /* CONFIG_ICE40_FGPA_LOAD_MODE_GPIO */
+
+#define FPGA_ICE40_LOAD_FUNC(inst)                                                                 \
+	(DT_INST_PROP(inst, load_mode_bitbang) ? FPGA_ICE40_LOAD_FUNC_GPIO                         \
+					       : FPGA_ICE40_LOAD_FUNC_SPI)
+
+#ifdef ICE40_PINCTRL_AND_GPIO_LOAD_MODE
 #define FPGA_ICE40_PINCTRL_CONFIG(inst) .pincfg = PINCTRL_DT_DEV_CONFIG_GET(DT_INST_PARENT(inst)),
 #define FPGA_ICE40_PINCTRL_DEFINE(inst) PINCTRL_DT_DEFINE(DT_INST_PARENT(inst))
 #else
@@ -589,6 +614,21 @@ static int fpga_ice40_init(const struct device *dev)
 	BUILD_ASSERT(FPGA_ICE40_TRAILING_CLOCKS(inst) >= FPGA_ICE40_TRAILING_CLOCKS_MIN);          \
 	BUILD_ASSERT(FPGA_ICE40_TRAILING_CLOCKS(inst) <= UINT8_MAX);                               \
 	BUILD_ASSERT(FPGA_ICE40_MHZ_DELAY_COUNT(inst) >= 0);                                       \
+	BUILD_ASSERT(ICE40_FPGA_LOAD_MODE_GPIO_AVAILABLE ||                                        \
+		     !DT_INST_PROP(inst, load_mode_bitbang));                                      \
+	BUILD_ASSERT(ICE40_FPGA_LOAD_MODE_SPI_AVAILABLE || DT_INST_PROP(inst, load_mode_bitbang)); \
+	BUILD_ASSERT(!DT_INST_PROP(inst, load_mode_bitbang) ||                                     \
+		     DT_INST_NODE_HAS_PROP(inst, creset_gpios));                                   \
+	BUILD_ASSERT(!DT_INST_PROP(inst, load_mode_bitbang) ||                                     \
+		     DT_INST_NODE_HAS_PROP(inst, cdone_gpios));                                    \
+	BUILD_ASSERT(!DT_INST_PROP(inst, load_mode_bitbang) ||                                     \
+		     DT_INST_NODE_HAS_PROP(inst, clk_gpios));                                      \
+	BUILD_ASSERT(!DT_INST_PROP(inst, load_mode_bitbang) ||                                     \
+		     DT_INST_NODE_HAS_PROP(inst, pico_gpios));                                     \
+	BUILD_ASSERT(!DT_INST_PROP(inst, load_mode_bitbang) ||                                     \
+		     DT_INST_NODE_HAS_PROP(inst, gpios_set_reg));                                  \
+	BUILD_ASSERT(!DT_INST_PROP(inst, load_mode_bitbang) ||                                     \
+		     DT_INST_NODE_HAS_PROP(inst, gpios_clear_reg));                                \
                                                                                                    \
 	FPGA_ICE40_PINCTRL_DEFINE(inst);                                                           \
 	static struct fpga_ice40_data fpga_ice40_data_##inst;                                      \
