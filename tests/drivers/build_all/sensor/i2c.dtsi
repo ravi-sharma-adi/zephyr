@@ -1131,3 +1131,14 @@ test_i2c_sts4x: sts4x@9d {
 	reg = <0x99>;
 	repeatability = <2>;
 };
+
+test_i2c_lis2duxs12: lis2duxs12@9e {
+	compatible = "st,lis2duxs12";
+	reg = <0x9e>;
+	int1-gpios = <&test_gpio 0 0>;
+	int2-gpios = <&test_gpio 0 0>;
+	range = <LIS2DUX12_DT_FS_16G>;
+	odr = <LIS2DUX12_DT_ODR_100Hz>;
+	power-mode = <LIS2DUX12_OPER_MODE_HIGH_FREQUENCY>;
+	status = "okay";
+};
