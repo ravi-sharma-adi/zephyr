@@ -5,9 +5,14 @@
  */
 
 #include <ctype.h>
+#include <zephyr/bluetooth/conn.h>
+#include <zephyr/bluetooth/gap.h>
 #include <zephyr/kernel.h>
 #include <string.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <zephyr/sys/util.h>
+#include <zephyr/sys_clock.h>
 #include <zephyr/types.h>
 
 
@@ -1044,8 +1049,83 @@ static int change_central_settings(void)
 	return 0;
 }
 
+static uint16_t calc_conn_interval(const struct bt_iso_cig_param *cig_param)
+{
+	/* Convert from microseconds to connection interval units (1.25ms)*/
+	const uint32_t c_to_p_interval = BT_GAP_US_TO_CONN_INTERVAL(cig_param->c_to_p_interval);
+	const uint32_t p_to_c_interval = BT_GAP_US_TO_CONN_INTERVAL(cig_param->p_to_c_interval);
+	const uint32_t max_conn_interval = BT_GAP_MS_TO_CONN_INTERVAL(500U);
+	const uint32_t min_conn_interval = BT_GAP_INIT_CONN_INT_MIN;
+	uint32_t tmp_c_to_p_interval = c_to_p_interval;
+	uint32_t tmp_p_to_c_interval = p_to_c_interval;
+	uint32_t tmp_common_interval = 0U;
+	uint32_t conn_interval;
+
+#if defined(CONFIG_BT_ISO_TEST_PARAMS)
+	tmp_common_interval = MIN(cig_param->iso_interval, max_conn_interval);
+#endif /* CONFIG_BT_ISO_TEST_PARAMS */
+
+	if (tmp_common_interval == 0U) {
+		/* Attempt to find a common SDU interval lower than max_conn_interval to use as base
+		 * for connection interval
+		 */
+		while (tmp_c_to_p_interval != tmp_p_to_c_interval &&
+		       MAX(tmp_c_to_p_interval, tmp_p_to_c_interval) < max_conn_interval) {
+			if (tmp_c_to_p_interval < tmp_p_to_c_interval) {
+				tmp_c_to_p_interval += c_to_p_interval;
+			} else {
+				tmp_p_to_c_interval += p_to_c_interval;
+			}
+		}
+
+		/* Will either be a common value or max_conn_interval */
+		tmp_common_interval =
+			MIN(MAX(tmp_c_to_p_interval, tmp_p_to_c_interval), max_conn_interval);
+	}
+
+	if (tmp_common_interval == max_conn_interval) {
+		conn_interval = tmp_common_interval;
+	} else {
+		/* Default connection interval to 6 times the SDU interval and reduce to a multiple
+		 * less than max_conn_interval_us
+		 */
+		conn_interval = tmp_common_interval * 6U;
+
+		/* Ensure that the conn interval is between min_conn_interval and
+		 * max_conn_interval for the sake of interopability and scheduling
+		 */
+		while (conn_interval < min_conn_interval) {
+			conn_interval += tmp_common_interval;
+		}
+		while (conn_interval > max_conn_interval) {
+			conn_interval -= tmp_common_interval;
+		}
+	}
+
+	/* If we cannot convert back then it's not a lossless conversion */
+	if (BT_CONN_INTERVAL_TO_US(c_to_p_interval) != cig_param->c_to_p_interval) {
+		LOG_WRN("c_to_p_interval of %u us is not a multiple of the connection interval "
+			"unit (1.25 ms) and may be subpar. Suggest to adjust SDU "
+			"interval to be a multiple of 1.25 ms",
+			cig_param->c_to_p_interval);
+	}
+
+	/* If we cannot convert back then it's not a lossless conversion */
+	if (BT_CONN_INTERVAL_TO_US(p_to_c_interval) != cig_param->p_to_c_interval) {
+		LOG_WRN("p_to_c_interval of %u us is not a multiple of the connection interval "
+			"unit (1.25 ms) and may be subpar. Suggest to adjust SDU "
+			"interval to be a multiple of 1.25 ms",
+			cig_param->p_to_c_interval);
+	}
+
+	return conn_interval;
+}
+
 static int central_create_connection(void)
 {
+	const uint16_t conn_interval = calc_conn_interval(&cig_create_param);
+	const struct bt_le_conn_param *conn_param =
+		BT_LE_CONN_PARAM(conn_interval, conn_interval, 0, BT_GAP_MS_TO_CONN_TIMEOUT(4000));
 	int err;
 
 	advertiser_found = false;
@@ -1071,8 +1151,7 @@ static int central_create_connection(void)
 	}
 
 	LOG_INF("Connecting");
-	err = bt_conn_le_create(&adv_addr, BT_CONN_LE_CREATE_CONN,
-				BT_LE_CONN_PARAM_DEFAULT, &default_conn);
+	err = bt_conn_le_create(&adv_addr, BT_CONN_LE_CREATE_CONN, conn_param, &default_conn);
 	if (err != 0) {
 		LOG_ERR("Create connection failed: %d", err);
 		return err;
