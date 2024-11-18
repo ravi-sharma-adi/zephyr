@@ -7,20 +7,19 @@ devicetree bindings.
 """
 
 import argparse
-from collections import defaultdict
 import glob
 import io
 import logging
 import os
-from pathlib import Path
 import pprint
 import re
 import sys
 import textwrap
-
-from devicetree import edtlib
+from collections import defaultdict
+from pathlib import Path
 
 import gen_helpers
+from devicetree import edtlib
 
 ZEPHYR_BASE = Path(__file__).parents[2]
 
@@ -265,7 +264,7 @@ def load_driver_sources():
                 if not filename.endswith(('.c', '.h')):
                     continue
                 filepath = Path(dirpath) / filename
-                with open(filepath, "r", encoding="utf-8") as f:
+                with open(filepath, encoding="utf-8") as f:
                     content = f.read()
 
                 relative_path = filepath.relative_to(ZEPHYR_BASE)
@@ -349,9 +348,9 @@ def write_dummy_index(bindings, out_dir):
 
     # build compatibles set and dump it
     compatibles = {binding.compatible for binding in bindings}
-    content += '\n'.join((
+    content += '\n'.join(
         f'.. dtcompatible:: {compatible}' for compatible in compatibles
-    ))
+    )
 
     write_if_updated(out_dir / 'bindings.rst', content)
 
@@ -511,10 +510,7 @@ def print_binding_page(binding, base_names, vnd_lookup, driver_sources,dup_compa
     #
     # Title [(on <bus> bus)]
     # ######################
-    if binding.on_bus:
-        on_bus_title = f' (on {binding.on_bus} bus)'
-    else:
-        on_bus_title = ''
+    on_bus_title = f' (on {binding.on_bus} bus)' if binding.on_bus else ''
     compatible = binding.compatible
 
     title = f'{compatible}{on_bus_title}'
@@ -568,10 +564,7 @@ def print_binding_page(binding, base_names, vnd_lookup, driver_sources,dup_compa
         )
 
     # Binding description.
-    if binding.bus:
-        bus_help = f'These nodes are "{binding.bus}" bus nodes.'
-    else:
-        bus_help = ''
+    bus_help = f'These nodes are "{binding.bus}" bus nodes.' if binding.bus else ''
     print_block(f'''\
     Description
     ***********

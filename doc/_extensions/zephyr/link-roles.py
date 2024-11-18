@@ -4,14 +4,13 @@
 
 # based on http://protips.readthedocs.io/link-roles.html
 
-from __future__ import print_function
-from __future__ import unicode_literals
 import re
 import subprocess
-from docutils import nodes
 from pathlib import Path
-from sphinx.util import logging
 from typing import Final
+
+from docutils import nodes
+from sphinx.util import logging
 
 ZEPHYR_BASE: Final[str] = Path(__file__).parents[3]
 
@@ -58,8 +57,9 @@ def setup(app):
 
 
 def modulelink(default_module=None, format="blob"):
-    def role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    def role(name, rawtext, text, lineno, inliner, options=None, content=None):
         # Set default values
+        options = options or {}
         module = default_module
         rev = get_github_rev()
         config = inliner.document.settings.env.app.config
