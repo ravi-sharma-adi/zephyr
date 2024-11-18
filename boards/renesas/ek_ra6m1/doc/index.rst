@@ -94,6 +94,8 @@ The below features are currently supported on Zephyr OS for EK-RA6M1 board:
 +-----------+------------+----------------------+
 | CLOCK     | on-chip    | clock control        |
 +-----------+------------+----------------------+
+| ADC       | on-chip    | adc                  |
++-----------+------------+----------------------+
 
 Other hardware features are currently not supported by the port.
 

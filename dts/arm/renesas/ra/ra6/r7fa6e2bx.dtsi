@@ -7,6 +7,8 @@
 #include <arm/renesas/ra/ra6/ra6-cm33-common.dtsi>
 #include <zephyr/dt-bindings/clock/ra_clock.h>
 
+/delete-node/ &adc1;
+
 / {
 	soc {
 		sram0: memory@20000000 {
@@ -22,6 +24,11 @@
 			#gpio-cells = <2>;
 			ngpios = <16>;
 			status = "disabled";
+		};
+
+		adc@40170000 {
+			channel-count = <12>;
+			channel-available-mask = <0x139f7>;
 		};
 
 		id_code: id_code@100a120 {
