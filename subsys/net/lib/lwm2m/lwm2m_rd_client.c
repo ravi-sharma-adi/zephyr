@@ -63,6 +63,7 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 #include "lwm2m_rw_link_format.h"
 #include "lwm2m_util.h"
 #include "lwm2m_obj_server.h"
+#include "lwm2m_pull_context.h"
 
 #define LWM2M_RD_CLIENT_URI "rd"
 #define CLIENT_EP_LEN		CONFIG_LWM2M_RD_CLIENT_ENDPOINT_NAME_MAX_LENGTH
@@ -1568,6 +1569,10 @@ int lwm2m_rd_client_start(struct lwm2m_ctx *client_ctx, const char *ep_name,
 	client.ctx->srv_obj_inst = -1;
 	client.ctx->sec_obj_inst = -1;
 	client.retries = 0;
+
+#if defined(CONFIG_LWM2M_FIRMWARE_UPDATE_PULL_SUPPORT)
+	lwm2m_pull_context_set_sockopt_callback(client.ctx->set_socketoptions);
+#endif
 
 	strncpy(client.ep_name, ep_name, CLIENT_EP_LEN - 1);
 	client.ep_name[CLIENT_EP_LEN - 1] = '\0';
