@@ -12,7 +12,7 @@
  * Adapted from
  * https://git.musl-libc.org/cgit/libc-testsuite/tree/fnmatch.c
  */
-ZTEST(fnmatch, test_fnmatch)
+ZTEST(posix_c_lib_ext, test_fnmatch)
 {
 	/* Note: commented out lines indicate known problems to be addressed in #55186 */
 
@@ -82,5 +82,3 @@ ZTEST(fnmatch, test_fnmatch)
 	zassert_ok(fnmatch("a*b", "a.b", FNM_PATHNAME | FNM_PERIOD));
 	zassert_ok(fnmatch("a[.]b", "a.b", FNM_PATHNAME | FNM_PERIOD));
 }
-
-ZTEST_SUITE(fnmatch, NULL, NULL, NULL, NULL, NULL);
