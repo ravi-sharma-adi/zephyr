@@ -38,7 +38,7 @@
 &mco2 {
 	status = "okay";
 	clocks = <&rcc STM32_SRC_HSE MCO2_SEL(MCO2_SEL_HSE)>;
-	prescaler = <MCO2_PRE(MCO2_PRE_DIV_5)>;
+	prescaler = <MCO2_PRE_DIV_5>;
 	pinctrl-0 = <&rcc_mco_2_pc9>; /* uSD_D1 (CN3 pin 8) */
 	pinctrl-names = "default";
 };

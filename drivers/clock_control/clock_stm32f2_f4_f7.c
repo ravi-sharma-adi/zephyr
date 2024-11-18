@@ -110,7 +110,11 @@ void config_plli2s(void)
 				       STM32_PLLI2S_N_MULTIPLIER,
 				       plli2sr(STM32_PLLI2S_R_DIVISOR));
 #elif DT_HAS_COMPAT_STATUS_OKAY(st_stm32f412_plli2s_clock)
+#ifdef RCC_PLLR_I2S_CLKSOURCE_SUPPORT
 	LL_RCC_PLL_ConfigDomain_I2S(get_pll_source(),
+#else
+	LL_RCC_PLLI2S_ConfigDomain_I2S(get_pll_source(),
+#endif
 				       plli2sm(STM32_PLLI2S_M_DIVISOR),
 				       STM32_PLLI2S_N_MULTIPLIER,
 				       plli2sr(STM32_PLLI2S_R_DIVISOR));
