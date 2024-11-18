@@ -249,9 +249,11 @@ def test_cmake_parse_generated(mocked_jobserver):
     cmake = CMake(testsuite_mock, platform_mock, source_dir, build_dir,
                   mocked_jobserver)
 
+    cmake.instance = mock.Mock()
+
     result = cmake.parse_generated()
 
-    assert cmake.defconfig == {}
+    assert cmake.instance.defconfig == {}
     assert result == {}
 
 
@@ -510,7 +512,7 @@ def test_cmake_run_cmake(
 
 TESTDATA_3 = [
     ('unit_testing', [], False, True, None, True, None, True,
-     None, None, {}, {}, None, None, [], {}),
+     None, None, None, {}, None, None, [], {}),
     (
         'other', [], True,
         True, ['dummy', 'west', 'options'], True,
@@ -546,7 +548,7 @@ TESTDATA_3 = [
         'Dummy parse results', True,
         None,
         os.path.join('build', 'dir', 'zephyr', 'edt.pickle'),
-        {},
+        None,
         {},
         {'ARCH': 'dummy arch', 'PLATFORM': 'other', 'env_dummy': True},
         b'dummy edt pickle contents',
@@ -559,7 +561,7 @@ TESTDATA_3 = [
         'Dummy parse results', True,
         None,
         None,
-        {},
+        None,
         {},
         {},
         None,
@@ -572,7 +574,7 @@ TESTDATA_3 = [
         'Dummy parse results', True,
         None,
         None,
-        {},
+        None,
         {'dummy cache elem': 1},
         {'ARCH': 'dummy arch', 'PLATFORM': 'other', 'env_dummy': True,
          'dummy cache elem': 1},
@@ -586,7 +588,7 @@ TESTDATA_3 = [
         'Dummy parse results', True,
         None,
         os.path.join('build', 'dir', 'zephyr', 'edt.pickle'),
-        {},
+        None,
         {'dummy cache elem': 1},
         {'ARCH': 'dummy arch', 'PLATFORM': 'other', 'env_dummy': True,
          'dummy cache elem': 1},
@@ -600,7 +602,7 @@ TESTDATA_3 = [
         None, True,
         None,
         os.path.join('build', 'dir', 'zephyr', 'edt.pickle'),
-        {},
+        None,
         {'dummy cache elem': 1},
         {'ARCH': 'dummy arch', 'PLATFORM': 'other', 'env_dummy': True,
          'dummy cache elem': 1},
@@ -614,7 +616,7 @@ TESTDATA_3 = [
         'Dummy parse results', False,
         None,
         os.path.join('build', 'dir', 'zephyr', 'edt.pickle'),
-        {},
+        None,
         {'dummy cache elem': 1},
         {'ARCH': 'dummy arch', 'PLATFORM': 'other', 'env_dummy': True,
          'dummy cache elem': 1},
@@ -629,7 +631,7 @@ TESTDATA_3 = [
         SyntaxError, True,
         None,
         os.path.join('build', 'dir', 'zephyr', 'edt.pickle'),
-        {},
+        None,
         {'dummy cache elem': 1},
         {'ARCH': 'dummy arch', 'PLATFORM': 'other', 'env_dummy': True,
          'dummy cache elem': 1},
@@ -723,6 +725,7 @@ def test_filterbuilder_parse_generated(
     instance_mock = mock.Mock()
     instance_mock.sysbuild = 'sysbuild' if sysbuild else None
     fb.instance = instance_mock
+    fb.instance.defconfig = None
     fb.env = mock.Mock()
     fb.env.options = mock.Mock()
     fb.env.options.west_flash = west_flash_options
@@ -750,7 +753,7 @@ def test_filterbuilder_parse_generated(
 
     assert all([log in caplog.text for log in expected_logs])
 
-    assert fb.defconfig == expected_defconfig
+    assert fb.instance.defconfig == expected_defconfig
 
     assert fb.cmake_cache == expected_cmakecache
 
@@ -2278,7 +2281,7 @@ def test_projectbuilder_run(
     pb.options.extra_test_args = ['dummy_arg1', 'dummy_arg2']
     pb.duts = ['another dut']
     pb.options.seed = seed
-    pb.defconfig = defconfig
+    pb.instance.defconfig = defconfig
     pb.parse_generated = mock.Mock()
 
     with mock.patch('twisterlib.runner.HarnessImporter.get_harness',
