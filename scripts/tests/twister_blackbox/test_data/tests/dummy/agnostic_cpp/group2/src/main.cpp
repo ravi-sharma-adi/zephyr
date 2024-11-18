@@ -1,11 +1,14 @@
 /*
- * Copyright (c) 2023 Intel Corporation
+ * Copyright (c) 2023-2024 Intel Corporation
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <zephyr/ztest.h>
 
+
+namespace
+{
 
 ZTEST_SUITE(a2_tests, NULL, NULL, NULL, NULL, NULL);
 
@@ -41,3 +44,5 @@ ZTEST(a3_tests, test_assert1)
 {
 	zassert_true(1, "1 was false");
 }
+
+} // namsespace
