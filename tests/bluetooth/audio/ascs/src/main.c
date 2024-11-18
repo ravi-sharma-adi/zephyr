@@ -34,6 +34,7 @@
 #include "pacs.h"
 
 #include "test_common.h"
+#include "ztest_assert.h"
 
 DEFINE_FFF_GLOBALS;
 
@@ -70,6 +71,7 @@ static void ascs_test_suite_fixture_init(struct ascs_test_suite_fixture *fixture
 	memset(fixture, 0, sizeof(*fixture));
 
 	err = bt_bap_unicast_server_register(&param);
+	zassert_equal(err, 0, "Unexpected err response %d", err);
 
 	fixture->ase_cp = test_ase_control_point_get();
 
