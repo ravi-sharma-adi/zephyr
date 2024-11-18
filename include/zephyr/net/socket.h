@@ -1206,6 +1206,9 @@ struct ip_mreqn {
 	int            imr_ifindex;   /**< Network interface index */
 };
 
+/** Clamp down the global port range for a given socket */
+#define IP_LOCAL_PORT_RANGE 51
+
 /** @} */
 
 /**
