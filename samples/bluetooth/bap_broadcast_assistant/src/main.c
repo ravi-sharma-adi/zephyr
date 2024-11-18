@@ -361,6 +361,14 @@ static void scan_recv_cb(const struct bt_le_scan_recv_info *info,
 		bt_data_parse(ad, device_found, (void *)&sr_info);
 
 		if (sr_info.has_bass && sr_info.has_pacs) {
+			/* We use BT_BAP_COEX_INT_MS_7_5_10_FAST to best support Scan Delegators
+			 * that support both 7.5 and 10ms SDU interval
+			 */
+			const struct bt_le_conn_param *conn_param = BT_LE_CONN_PARAM(
+				BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST),
+				BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST), 0,
+				BT_GAP_MS_TO_CONN_TIMEOUT(4000));
+
 			printk("Broadcast Sink Found:\n");
 			printk("  BT Name:        %s\n", sr_info.bt_name);
 
@@ -382,8 +390,7 @@ static void scan_recv_cb(const struct bt_le_scan_recv_info *info,
 
 			printk("Connecting to Broadcast Sink: %s\n", sr_info.bt_name);
 
-			err = bt_conn_le_create(info->addr, BT_CONN_LE_CREATE_CONN,
-						BT_LE_CONN_PARAM_DEFAULT,
+			err = bt_conn_le_create(info->addr, BT_CONN_LE_CREATE_CONN, conn_param,
 						&broadcast_sink_conn);
 			if (err != 0) {
 				printk("Failed creating connection (err=%u)\n", err);

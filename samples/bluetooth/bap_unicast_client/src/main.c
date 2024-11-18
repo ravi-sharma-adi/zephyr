@@ -112,6 +112,13 @@ static void print_codec_cap(const struct bt_audio_codec_cap *codec_cap)
 static bool check_audio_support_and_connect(struct bt_data *data,
 					    void *user_data)
 {
+	/* We use BT_BAP_COEX_INT_MS_7_5_10_FAST to best support Unicast Servers
+	 * that support both 7.5 and 10ms SDU interval
+	 */
+	const struct bt_le_conn_param *conn_param =
+		BT_LE_CONN_PARAM(BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST),
+				 BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST), 0,
+				 BT_GAP_MS_TO_CONN_TIMEOUT(4000));
 	struct net_buf_simple ascs_svc_data;
 	bt_addr_le_t *addr = user_data;
 	uint8_t announcement_type;
@@ -162,9 +169,7 @@ static bool check_audio_support_and_connect(struct bt_data *data,
 	printk("Audio server found with type %u, contexts 0x%08x and meta_len %u; connecting\n",
 	       announcement_type, audio_contexts, meta_len);
 
-	err = bt_conn_le_create(addr, BT_CONN_LE_CREATE_CONN,
-				BT_LE_CONN_PARAM_DEFAULT,
-				&default_conn);
+	err = bt_conn_le_create(addr, BT_CONN_LE_CREATE_CONN, conn_param, &default_conn);
 	if (err != 0) {
 		printk("Create conn to failed (%u)\n", err);
 		start_scan();

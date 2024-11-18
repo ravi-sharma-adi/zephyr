@@ -12,6 +12,7 @@
 
 #include <zephyr/bluetooth/addr.h>
 #include <zephyr/bluetooth/audio/audio.h>
+#include <zephyr/bluetooth/audio/bap.h>
 #include <zephyr/bluetooth/audio/cap.h>
 #include <zephyr/bluetooth/audio/lc3.h>
 #include <zephyr/bluetooth/audio/pacs.h>
@@ -102,9 +103,17 @@ BT_CONN_CB_DEFINE(conn_callbacks) = {
 
 static int advertise(void)
 {
+	/* Use BT_BAP_COEX_INT_MS_7_5_10_FAST as advertising interval to better support advertising
+	 * connectable, even if we are synced synced to a broadcast source by self-scanning
+	 */
+	const struct bt_le_adv_param *adv_param =
+		BT_LE_ADV_PARAM(BT_LE_ADV_OPT_EXT_ADV | BT_LE_ADV_OPT_CONN,
+				BT_GAP_MS_TO_ADV_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST),
+				BT_GAP_MS_TO_ADV_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST), NULL);
+
 	int err;
 
-	err = bt_le_ext_adv_create(BT_LE_EXT_ADV_CONN, NULL, &adv);
+	err = bt_le_ext_adv_create(adv_param, NULL, &adv);
 	if (err) {
 		LOG_ERR("Failed to create advertising set: %d", err);
 

@@ -39,18 +39,6 @@
 #include "bap_common.h"
 
 #if defined(CONFIG_BT_GMAP)
-/* Zephyr Controller works best while Extended Advertising interval to be a multiple
- * of the ISO Interval minus 10 ms (max. advertising random delay). This is
- * required to place the AUX_ADV_IND PDUs in a non-overlapping interval with the
- * Broadcast ISO radio events.
- */
-#define BT_LE_EXT_ADV_CUSTOM                                                                       \
-	BT_LE_ADV_PARAM(BT_LE_ADV_OPT_EXT_ADV, BT_GAP_MS_TO_ADV_INTERVAL(80),                      \
-			BT_GAP_MS_TO_ADV_INTERVAL(80), NULL)
-
-#define BT_LE_PER_ADV_CUSTOM                                                                       \
-	BT_LE_PER_ADV_PARAM(BT_GAP_MS_TO_PER_ADV_INTERVAL(90), BT_GAP_MS_TO_PER_ADV_INTERVAL(90),  \
-			    BT_LE_PER_ADV_OPT_NONE)
 
 #define UNICAST_SINK_SUPPORTED (CONFIG_BT_BAP_UNICAST_CLIENT_ASE_SNK_COUNT > 0)
 #define UNICAST_SRC_SUPPORTED  (CONFIG_BT_BAP_UNICAST_CLIENT_ASE_SRC_COUNT > 0)
@@ -514,6 +502,13 @@ static void init(void)
 static void gmap_device_found(const bt_addr_le_t *addr, int8_t rssi, uint8_t type,
 			      struct net_buf_simple *ad)
 {
+	/* We use BT_BAP_COEX_INT_MS_7_5_10_FAST to best support peripherals
+	 * that support both 7.5 and 10ms SDU interval
+	 */
+	const struct bt_le_conn_param *conn_param =
+		BT_LE_CONN_PARAM(BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST),
+				 BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST), 0,
+				 BT_GAP_MS_TO_CONN_TIMEOUT(4000));
 	char addr_str[BT_ADDR_LE_STR_LEN];
 	struct bt_conn *conn;
 	int err;
@@ -545,9 +540,7 @@ static void gmap_device_found(const bt_addr_le_t *addr, int8_t rssi, uint8_t typ
 		return;
 	}
 
-	err = bt_conn_le_create(addr, BT_CONN_LE_CREATE_CONN,
-				BT_LE_CONN_PARAM(BT_GAP_INIT_CONN_INT_MIN, BT_GAP_INIT_CONN_INT_MIN,
-						 0, BT_GAP_MS_TO_CONN_TIMEOUT(4000)),
+	err = bt_conn_le_create(addr, BT_CONN_LE_CREATE_CONN, conn_param,
 				&connected_conns[connected_conn_cnt]);
 	if (err) {
 		FAIL("Could not connect to peer: %d", err);
@@ -1024,25 +1017,6 @@ static void test_gmap_ugg_unicast_ac(const struct gmap_unicast_ac_param *param)
 	     param->src_named_preset != NULL ? param->src_named_preset->name : "None");
 }
 
-static void setup_extended_adv(struct bt_le_ext_adv **adv)
-{
-	int err;
-
-	/* Create a non-connectable advertising set */
-	err = bt_le_ext_adv_create(BT_LE_EXT_ADV_CUSTOM, NULL, adv);
-	if (err != 0) {
-		FAIL("Unable to create extended advertising set: %d\n", err);
-		return;
-	}
-
-	/* Set periodic advertising parameters */
-	err = bt_le_per_adv_set_param(*adv, BT_LE_PER_ADV_CUSTOM);
-	if (err) {
-		FAIL("Failed to set periodic advertising parameters: %d\n", err);
-		return;
-	}
-}
-
 static void setup_extended_adv_data(struct bt_cap_broadcast_source *source,
 				    struct bt_le_ext_adv *adv)
 {
@@ -1233,7 +1207,7 @@ static int test_gmap_ugg_broadcast_ac(const struct gmap_broadcast_ac_param *para
 	create_param.qos = &qos;
 
 	init();
-	setup_extended_adv(&adv);
+	setup_broadcast_adv(&adv);
 
 	err = bt_cap_initiator_broadcast_audio_create(&create_param, &broadcast_source);
 	if (err != 0) {

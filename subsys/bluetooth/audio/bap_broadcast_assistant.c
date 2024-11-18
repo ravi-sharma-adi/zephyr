@@ -784,6 +784,7 @@ static void bap_broadcast_assistant_write_cp_cb(struct bt_conn *conn, uint8_t er
 	net_buf_simple_reset(&att_buf);
 
 	atomic_clear_bit(inst->flags, BAP_BA_FLAG_BUSY);
+	LOG_ERR("");
 
 	SYS_SLIST_FOR_EACH_CONTAINER_SAFE(&broadcast_assistant_cbs, listener, next, _node) {
 		switch (opcode) {

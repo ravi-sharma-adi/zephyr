@@ -51,6 +51,63 @@ extern "C" {
 #define BT_BAP_INVALID_BROADCAST_ID 0xFFFFFFFFU
 
 /**
+ * @name Suggested connection and advertising intervals suited for coexistence with audio
+ *
+ * Suggest use is to use this as both the minimum and maximum interval for best results.
+ * The intervals are suited for both unicast and broadcast.
+ * @{
+ */
+/**
+ * @brief Fast interval suited for coexistence with 10ms SDU intervals
+ *
+ * This works well with ISO intervals of 10, 20 and 30 milliseconds for broadcast and unicast
+ */
+#define BT_BAP_COEX_INT_MS_10_FAST_1   60U
+/**
+ * @brief Fast interval suited for coexistence with 10ms SDU intervals
+ *
+ * This works well with ISO intervals of 10, 20, 30 and 40 milliseconds.
+ */
+#define BT_BAP_COEX_INT_MS_10_FAST_2   120U
+/**
+ * @brief Slow interval suited for coexistence with 10ms SDU intervals
+ *
+ * This works well with ISO intervals of 10, 20, 30, 40, 50 and 60 milliseconds
+ */
+#define BT_BAP_COEX_INT_MS_10_SLOW     600U
+/**
+ * @brief Fast interval suited for coexistence with 7.5ms SDU intervals
+ *
+ * This works well with ISO intervals of 7.5, 15 and 22.5 milliseconds
+ */
+#define BT_BAP_COEX_INT_MS_7_5_FAST_1  45U
+/**
+ * @brief Fast interval suited for coexistence with 7.5ms SDU intervals
+ *
+ * This works well with ISO intervals of 7.5, 15, 22.5, 30 and 45 milliseconds
+ */
+#define BT_BAP_COEX_INT_MS_7_5_FAST_2  90U
+/**
+ * @brief Slow interval suited for coexistence with 7.5ms SDU intervals
+ *
+ * This works well with ISO intervals of 7.5, 15, 22.5, 30, 37.5 and 45 milliseconds
+ */
+#define BT_BAP_COEX_INT_MS_7_5_SLOW    600U
+/**
+ * @brief Fast interval suited for coexistence with 7.5ms and 10ms SDU intervals
+ *
+ * This works well with ISO intervals of 7.5, 10, 15, 20 and 30 milliseconds
+ */
+#define BT_BAP_COEX_INT_MS_7_5_10_FAST 60U
+/**
+ * @brief Slow interval suited for coexistence with 7.5ms and 10ms SDU intervals
+ *
+ * This works well with ISO intervals of 7.5, 10, 15, 20, 22.5 and 30 milliseconds.
+ */
+#define BT_BAP_COEX_INT_MS_7_5_10_SLOW 180U
+/** @} */
+
+/**
  * @brief Check if a BAP BASS BIS_Sync bitfield is valid
  *
  * Valid options are eiter a bitmask of valid BIS indices, including none (0x00000000)

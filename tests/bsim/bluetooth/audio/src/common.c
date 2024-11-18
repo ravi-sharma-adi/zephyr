@@ -43,6 +43,13 @@ const struct bt_data ad[AD_SIZE] = {
 
 static void device_found(const struct bt_le_scan_recv_info *info, struct net_buf_simple *ad_buf)
 {
+	/* We use BT_BAP_COEX_INT_MS_7_5_10_FAST to best support peripherals
+	 * that support both 7.5 and 10ms SDU interval
+	 */
+	const struct bt_le_conn_param *conn_param =
+		BT_LE_CONN_PARAM(BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST),
+				 BT_GAP_MS_TO_CONN_INTERVAL(BT_BAP_COEX_INT_MS_7_5_10_FAST), 0,
+				 BT_GAP_MS_TO_CONN_TIMEOUT(4000));
 	char addr_str[BT_ADDR_LE_STR_LEN];
 	int err;
 
@@ -70,8 +77,7 @@ static void device_found(const struct bt_le_scan_recv_info *info, struct net_buf
 		return;
 	}
 
-	err = bt_conn_le_create(info->addr, BT_CONN_LE_CREATE_CONN, BT_LE_CONN_PARAM_DEFAULT,
-				&default_conn);
+	err = bt_conn_le_create(info->addr, BT_CONN_LE_CREATE_CONN, conn_param, &default_conn);
 	if (err) {
 		FAIL("Could not connect to peer: %d", err);
 	}
@@ -148,6 +154,42 @@ BT_CONN_CB_DEFINE(conn_callbacks) = {
 	.le_param_updated = conn_param_updated_cb,
 	.security_changed = security_changed_cb,
 };
+
+void setup_broadcast_adv(struct bt_le_ext_adv **adv)
+{
+	/* Zephyr Controller works best while Extended Advertising interval to be a multiple
+	 * of the ISO Interval minus 10 ms (max. advertising random delay). This is
+	 * required to place the AUX_ADV_IND PDUs in a non-overlapping interval with the
+	 * Broadcast ISO radio events.
+	 */
+	const struct bt_le_adv_param *ext_adv_param = BT_LE_ADV_PARAM(
+		BT_LE_ADV_OPT_EXT_ADV, BT_GAP_MS_TO_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2 - 10),
+		BT_GAP_MS_TO_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2 - 10), NULL);
+
+	/* We use BT_BAP_COEX_INT_MS_10_FAST_2 as this sample only supports using 10ms SDU
+	 * interval. BT_BAP_COEX_INT_MS_10_FAST_2 balances well between sync time (lower
+	 * interval is faster) and air time (lower interval require more air time)
+	 */
+	const struct bt_le_per_adv_param *per_adv_param =
+		BT_LE_PER_ADV_PARAM(BT_GAP_MS_TO_PER_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2),
+				    BT_GAP_MS_TO_PER_ADV_INTERVAL(BT_BAP_COEX_INT_MS_10_FAST_2),
+				    BT_LE_PER_ADV_OPT_NONE);
+	int err;
+
+	/* Create a non-connectable advertising set */
+	err = bt_le_ext_adv_create(ext_adv_param, NULL, adv);
+	if (err != 0) {
+		FAIL("Unable to create extended advertising set: %d\n", err);
+		return;
+	}
+
+	/* Set periodic advertising parameters */
+	err = bt_le_per_adv_set_param(*adv, per_adv_param);
+	if (err) {
+		FAIL("Failed to set periodic advertising parameters: %d\n", err);
+		return;
+	}
+}
 
 void test_tick(bs_time_t HW_device_time)
 {
