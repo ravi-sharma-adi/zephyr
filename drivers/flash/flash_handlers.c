@@ -36,6 +36,18 @@ static inline int z_vrfy_flash_erase(const struct device *dev, off_t offset,
 }
 #include <zephyr/syscalls/flash_erase_mrsh.c>
 
+static inline int z_vrfy_flash_mmap(const struct device *dev, void **base,
+				    uint64_t *size, uint32_t flags)
+{
+	K_OOPS(K_SYSCALL_DRIVER_FLASH(dev, mmap));
+	K_OOPS(K_SYSCALL_MEMORY_READ(*base, sizeof(*base)));
+	K_OOPS(K_SYSCALL_MEMORY_WRITE(*base, sizeof(*base)));
+	K_OOPS(K_SYSCALL_MEMORY_READ(size, sizeof(*size)));
+	K_OOPS(K_SYSCALL_MEMORY_WRITE(size, sizeof(*size)));
+	return z_impl_flash_mmap((const struct device *)dev, base, size, flags);
+}
+#include <zephyr/syscalls/flash_mmap_mrsh.c>
+
 static inline size_t z_vrfy_flash_get_write_block_size(const struct device *dev)
 {
 	K_OOPS(K_SYSCALL_OBJ(dev, K_OBJ_DRIVER_FLASH));
