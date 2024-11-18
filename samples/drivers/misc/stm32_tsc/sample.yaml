@@ -1,0 +1,8 @@
+sample:
+  name: stm32_tsc
+tests:
+  sample.drivers.misc.stm32_tsc:
+    tags:
+      - drivers
+    filter: dt_compat_enabled("st,stm32-tsc")
+    platform_allow: stm32u083c_dk
