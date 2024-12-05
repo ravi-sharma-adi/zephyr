@@ -1,0 +1,9 @@
+# ATHENAEVKIT boards configuration
+
+# Copyright (c) 2024 Analog Devices, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_ATHENAEVKIT
+	select SOC_ANDES_AE350 if BOARD_ATHENAEVKIT_AE350
+
+

@@ -1,0 +1,96 @@
+/*
+ * Copyright (c) 2024 Analog Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include "andes/andes_v5_ae350.dtsi"
+
+/ {
+    model = "Andes AE350 Single Core No IOs/SPI/Flash";
+    compatible = "andestech,athenaevkit";
+
+    // Disable all CPUs except CPU0
+    cpus {
+        CPU1: cpu@1 {
+            status = "disabled";
+        };
+        CPU2: cpu@2 {
+            status = "disabled";
+        };
+        CPU3: cpu@3 {
+            status = "disabled";
+        };
+        CPU4: cpu@4 {
+            status = "disabled";
+        };
+        CPU5: cpu@5 {
+            status = "disabled";
+        };
+        CPU6: cpu@6 {
+            status = "disabled";
+        };
+        CPU7: cpu@7 {
+            status = "disabled";
+        };
+    };
+
+    // Set the memory size to 400KB
+    dram: memory@0 {
+        device_type = "memory";
+        compatible = "mmio-sram";
+        reg = <0x00000000 0x40000000>;  // 400KB of memory
+    };
+
+    // Disable all peripherals like UART, SPI, GPIO, etc.
+    soc {
+        uart0: serial@f0200020 {
+            status = "disabled";
+        };
+        uart1: serial@f0300020 {
+            status = "disabled";
+        };
+        spi0: spi@f0b00000 {
+            status = "disabled";
+        };
+        spi1: spi@f0f00000 {
+            status = "disabled";
+        };
+        dma0: dma@f0c00000 {
+            status = "disabled";
+        };
+        eth0: eth@e0100000 {
+            status = "disabled";
+        };
+        lcd0: lcd@e0200000 {
+            status = "disabled";
+        };
+        wdt: wdt@f0500000 {
+            status = "disabled";
+        };
+        smc0: smc@e0400000 {
+            status = "disabled";
+        };
+        snd0: snd@f0d00000 {
+            status = "disabled";
+        };
+        mmc0: mmc@f0e00000 {
+            status = "disabled";
+        };
+        gpio0: gpio@f0700000 {
+            status = "disabled";
+        };
+        i2c0: i2c@f0a00000 {
+            status = "disabled";
+        };
+        rtc0: rtc@f0600000 {
+            status = "disabled";
+        };
+        pit0: pit@f0400000 {
+            status = "disabled";
+        };
+    };
+};
+
+

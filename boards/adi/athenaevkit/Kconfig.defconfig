@@ -1,0 +1,16 @@
+# ATEHNAEVKIT boards configuration
+
+# Copyright (c) 2024 Analog Devices, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+if BOARD_ATHENAEVKIT
+
+config SRAM_SIZE
+    int "RAM size in kilobytes"
+    default 512
+    depends on SOC_ANDES_AE350
+
+endif # BOARD_ATHENAEVKIT
+
+
+
