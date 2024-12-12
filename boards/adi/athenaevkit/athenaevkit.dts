@@ -36,6 +36,13 @@
         };
     };
 
+    chosen {
+	    zephyr,console = &uart1;
+	    zephyr,shell-uart = &uart1;
+	    zephyr,sram = &dram;
+	    counter-0 = &pit0;
+    };
+
     // Set the memory size to 400KB
     dram: memory@0 {
         device_type = "memory";
@@ -49,7 +56,10 @@
             status = "disabled";
         };
         uart1: serial@f0300020 {
-            status = "disabled";
+            status = "okay";
+	    clock-frequency = <19660800>;
+	    current-speed = <115200>;
+
         };
         spi0: spi@f0b00000 {
             status = "disabled";
@@ -67,7 +77,7 @@
             status = "disabled";
         };
         wdt: wdt@f0500000 {
-            status = "disabled";
+            status = "okay";
         };
         smc0: smc@e0400000 {
             status = "disabled";
@@ -85,12 +95,19 @@
             status = "disabled";
         };
         rtc0: rtc@f0600000 {
-            status = "disabled";
+            status = "okay";
         };
         pit0: pit@f0400000 {
-            status = "disabled";
+            status = "okay";
         };
     };
 };
 
+&l2_cache {
+	status = "okay";
+};
+
+&syscon {
+	status = "okay";
+};
 

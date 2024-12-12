@@ -3,17 +3,17 @@
 
 CONFIG_XIP=n
 
-#CONFIG_CONSOLE=y
-#CONFIG_UART_CONSOLE=y
+CONFIG_CONSOLE=y
+CONFIG_UART_CONSOLE=y
 
 # Serial driver options
-#CONFIG_SERIAL=y
+CONFIG_SERIAL=y
 
 # GPIO driver options
 #CONFIG_GPIO=y
 
 # Syscon driver options
-#CONFIG_SYSCON=y
+CONFIG_SYSCON=y
 
 # hwinfo driver options
 CONFIG_HWINFO=y
@@ -49,3 +49,6 @@ CONFIG_PMP_GRANULARITY=8
 
 # I/O Coherence Port options
 #CONFIG_SOC_ANDES_V5_IOCP=y
+#puncover
+#CONFIG_COVERAGE=y
+#CONFIG_TEST=y
